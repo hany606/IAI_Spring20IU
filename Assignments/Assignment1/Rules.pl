@@ -7,67 +7,41 @@
     - https://stackoverflow.com/questions/22747147/swi-prolog-write-to-file
     - https://www.swi-prolog.org/pldoc/ 
 */
-read_file(X):-
-    open('input.txt', read, Str),
-    read_file_util(Str,X),
-    % write(X), nl.
-    close(Str).
 
-read_file_util(Stream,[]) :-
-    at_end_of_stream(Stream).
+param(5,gridSize).
 
-read_file_util(Stream,[X|L]) :-
-    \+ at_end_of_stream(Stream),
-    read(Stream,X),
-    read_file_util(Stream,L).
+:- dynamic ball/2.
 
 
+valid(X,Y) :-
+    param(Z,gridSize),
+    X >= 0, X < Z,
+    Y >= 0, Y < Z.
 
-writefacts(Type,XX,YY) :-
-    % write("--\t"), write(X),write("\t"), write(Y),  write("\t--\n"),
-    atom_number(XX,X),
-    atom_number(YY,Y),
-    open('facts.txt',append,Out),
-    format(atom(Tmp_out), '~s(~D,~D).\n', [Type,X,Y]),
-    write(Out,Tmp_out),
-    % write("finish\n"),
-    close(Out). 
+searh(X,Y, false) :-
+    false
 
-% object(h,X,Y) :-
-%     human(3,4).
+searh(X,Y, true) :-
+    true.
 
-% object(t,X,Y) :-
-%     touchdown(5,6).
+searh(X,Y) :-
+    % searh(X+1,Y).
+    nextUp(X,Y),
+    writeln(X).
 
-% parse2([_(X,Y)_|T]) :-
-parse([]).
-parse([Z|T]) :-
-    re_split('[oth]', Z, [_,Type,Rest], []),
-    re_split('\\(', Rest, [_,_,Rest1], []),
-    re_split('\\)', Rest1, [Num|_], []),
-    re_split('\\s', Num, [X,_,Y], []),
+nextUp(X,Y) :-
+    valid(X+1,Y),
+    X+1.
 
-    % write(Type), write('\t'), 
-    % write(Rest), write('\t'), 
-    % write(Rest1), write('\t'), 
-    % write(Num), write('\t'), 
-    % write(X), write('\t'),
-    % write(Y), nl,
-    % upper_lower(Type, TType),
-    % write(Type),
-    writefacts(Type, X,Y),
-    parse(T).
+nextDown(X,Y) :-
+    valid(X-1,Y).
 
-% , nl, write(Y).
-% re_split("  ", "O(12,3)", Split, []).
 
 main :-
-    open('facts.txt',write,Out),
-    write(Out,""),
-    close(Out),
-    read_file(Input),
-    parse(Input),
-    consult("facts.txt").
+    consult("input.txt"),
+    s(SX,SY),
+    ball(SX,SY),
+    searh(SX,SY).
 
 % empty (X,Y):-
 %     \+ o(X,Y),
