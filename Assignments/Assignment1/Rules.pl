@@ -8,40 +8,145 @@
     - https://www.swi-prolog.org/pldoc/ 
 */
 
-param(5,gridSize).
+param(5,mapSize).
 
-:- dynamic ball/2.
+:- dynamic mapBoarders/2.
+:- dynamic mapOrcs/2.
+:- dynamic mapHumans/2.
+:- dynamic mapTouchDown/2.
+:- dynamic mapStart/2.
+:- dynamic ballPos/2.
+:- dynamic path/2.
+
+ballPos(0,0).
+
+resetMap :-
+    retractall(mapBoarders(_,_)),
+    retractall(mapHumans(_,_)),
+    retractall(mapOrcs(_,_)),
+    retractall(mapTouchDown(_,_)),
+    retractall(mapStart(_,_)).
+    
+initBoarders(0) :- 
+    asserta(mapBoarders(0,0)),
+    param(Z, mapSize),
+    Znew is Z +1,
+    asserta(mapBoarders(Znew,0)),
+    asserta(mapBoarders(0,Znew)),
+    asserta(mapBoarders(Znew,Znew)), !.
+
+initBoarders(N) :-
+    asserta(mapBoarders(0,N)),
+    asserta(mapBoarders(N,0)),
+    param(Z,mapSize),
+    Znew is Z +1,
+    asserta(mapBoarders(Znew,N)),
+    asserta(mapBoarders(N,Znew)),
+    Nnew is N -1,
+    initBoarders(Nnew).
+
+initMap :-
+    param(Z,mapSize),
+    initBoarders(Z),
+    o(Xo,Yo),
+    asserta(mapOrcs(Xo,Yo)),
+    h(Xh,Yh),
+    asserta(mapHumans(Xh,Yh)),
+    t(Xt,Yt),
+    asserta(mapTouchDown(Xt,Yt)),
+    s(Xs,Ys),
+    asserta(mapStart(Xs,Ys)),
+    changeBallPos(Xs,Ys),
+    asserta(path(Xs,Ys)).
 
 
+restartMap :-
+    clearMap,
+    initMap.
+
+
+
+% valid(X,Y) :-
+%     param(Z,mapSize),
+%     X > 0, X =< Z,
+%     Y > 0, Y =< Z.
+    
 valid(X,Y) :-
-    param(Z,gridSize),
-    X >= 0, X < Z,
-    Y >= 0, Y < Z.
+    not(mapBoarders(X,Y)),
+    not(mapOrcs(X,Y)),
+    not(path(X,Y)).
 
-searh(X,Y, false) :-
-    false
+reached(X,Y) :-
+    mapTouchDown(X,Y),
+    write("\n----------Reached!!!----------\n").
 
-searh(X,Y, true) :-
+search(X,Y) :-
+    % search(X+1,Y).
+    asserta(path(X,Y)),
+    reached(X,Y);
+    move(X,Y),
+    pass(X,Y).
+
+
+
+pass(X,Y) :-
     true.
 
-searh(X,Y) :-
-    % searh(X+1,Y).
-    nextUp(X,Y),
-    writeln(X).
 
-nextUp(X,Y) :-
-    valid(X+1,Y),
-    X+1.
+move(X,Y) :-
+    format('\n#Current ~d ~d', [X,Y]),
+    nextUp(X,Y,Xu,Yu),
+    format('\nUp ~d ~d', [Xu, Yu]),
+    search(Xu,Yu),
+    retract(path(Xu,Yu));
+    nextDown(X,Y,Xd,Yd),
+    format('\nDown ~d ~d', [Xd, Yd]),
+    search(Xd,Yd),
+    retract(path(Xd,Yd));
+    nextRight(X,Y,Xr,Yr),
+    format('\nRight ~d ~d', [Xr, Yr]),
+    search(Xr,Yr),
+    retract(path(Xr,Yr));
+    nextLeft(X,Y,Xl,Yl),
+    format('\nLeft ~d ~d', [Xl, Yl]),
+    search(Xl,Yl),
+    retract(path(Xl,Yl)).
+    
 
-nextDown(X,Y) :-
-    valid(X-1,Y).
+nextRight(X,Y, Xr, Yr) :-
+    Yr is Y,
+    Xnew is X +1,
+    valid(Xnew,Y),
+    Xr is Xnew.
+
+nextLeft(X,Y, Xl, Yl) :-
+    Yl is Y,
+    Xnew is X -1,
+    valid(Xnew,Y),
+    Xl is Xnew.
+
+nextUp(X,Y, Xu, Yu) :-
+    Xu is X,
+    Ynew is Y +1,
+    valid(X,Ynew),
+    Yu is Ynew.
+
+nextDown(X,Y, Xd, Yd) :-
+    Xd is X,
+    Ynew is Y -1,
+    valid(X,Ynew),
+    Yd is Ynew.
+
+changeBallPos(X,Y) :-
+    retractall(ballPos(_,_)),
+    assert(ballPos(X,Y)).
 
 
 main :-
     consult("input.txt"),
-    s(SX,SY),
-    ball(SX,SY),
-    searh(SX,SY).
+    s(Xs,Ys),
+    initMap ,
+    search(Xs,Ys).
 
 % empty (X,Y):-
 %     \+ o(X,Y),
