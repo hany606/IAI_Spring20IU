@@ -16,6 +16,7 @@ param(5,mapSize).
 :- dynamic mapTouchDown/2.
 :- dynamic mapStart/2.
 :- dynamic ballPos/2.
+:- dynamic visited/2.
 :- dynamic path/2.
 
 ballPos(0,0).
@@ -57,7 +58,7 @@ initMap :-
     s(Xs,Ys),
     asserta(mapStart(Xs,Ys)),
     changeBallPos(Xs,Ys),
-    asserta(path(Xs,Ys)).
+    asserta(visited(Xs,Ys)).
 
 
 restartMap :-
@@ -74,15 +75,18 @@ restartMap :-
 valid(X,Y) :-
     not(mapBoarders(X,Y)),
     not(mapOrcs(X,Y)),
-    not(path(X,Y)).
+    not(visited(X,Y)).
 
 reached(X,Y) :-
     mapTouchDown(X,Y),
+    visited(Xv,Yv),
+    asserta(path(Xv,Yv)),
+    write(Xv), write(Yv),
     write("\n----------Reached!!!----------\n").
 
 search(X,Y) :-
     % search(X+1,Y).
-    asserta(path(X,Y)),
+    asserta(visited(X,Y)),
     reached(X,Y);
     move(X,Y),
     pass(X,Y).
@@ -98,19 +102,19 @@ move(X,Y) :-
     nextUp(X,Y,Xu,Yu),
     format('\nUp ~d ~d', [Xu, Yu]),
     search(Xu,Yu),
-    retract(path(Xu,Yu));
+    retract(visited(Xu,Yu));
     nextDown(X,Y,Xd,Yd),
     format('\nDown ~d ~d', [Xd, Yd]),
     search(Xd,Yd),
-    retract(path(Xd,Yd));
+    retract(visited(Xd,Yd));
     nextRight(X,Y,Xr,Yr),
     format('\nRight ~d ~d', [Xr, Yr]),
     search(Xr,Yr),
-    retract(path(Xr,Yr));
+    retract(visited(Xr,Yr));
     nextLeft(X,Y,Xl,Yl),
     format('\nLeft ~d ~d', [Xl, Yl]),
     search(Xl,Yl),
-    retract(path(Xl,Yl)).
+    retract(visited(Xl,Yl)).
     
 
 nextRight(X,Y, Xr, Yr) :-
