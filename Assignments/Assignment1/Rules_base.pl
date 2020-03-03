@@ -6,14 +6,6 @@
     - https://www.swi-prolog.org/pldoc/doc_for?object=re_split/3
     - https://stackoverflow.com/questions/22747147/swi-prolog-write-to-file
     - https://www.swi-prolog.org/pldoc/ 
-    - https://stackoverflow.com/questions/32691313/counter-in-prolog (Counter part)
-    - https://stackoverflow.com/questions/42466637/decrement-the-same-variable-in-prolog
-    - http://rigaux.org/language-study/syntax-across-languages-per-language/Prolog.html
-*/
-
-/*
-    Assumptions:
-        - Walls surrounded the playground, from each side there is a wall (Extra row/column).
 */
 
 param(5,mapSize).
@@ -28,26 +20,8 @@ param(5,mapSize).
 :- dynamic path/2.
 :- dynamic optimalPathCount/2.
 
-:- dynamic stepscounter/1.
-
-initsteps :-
-    retractall(stepscounter(_)),
-    assertz(stepscounter(0)).
-
-incrsteps :-
-    stepscounter(V),
-    retractall(stepscounter(_)),
-    succ(V, V1),
-    assertz(stepscounter(V1)).
-
-decrsteps :-
-    stepscounter(V),
-    retractall(stepscounter(_)),
-    succ(V0, V),
-    assertz(stepscounter(V0)).
-
-
 ballPos(0,0).
+
 
 
 resetMap :-
@@ -69,16 +43,15 @@ initBoarders(N) :-
     asserta(mapBoarders(0,N)),
     asserta(mapBoarders(N,0)),
     param(Z,mapSize),
-    succ(Z,Znew),
+    Znew is Z +1,
     asserta(mapBoarders(Znew,N)),
     asserta(mapBoarders(N,Znew)),
-    succ(Nnew, N),
+    Nnew is N -1,
     initBoarders(Nnew).
 
 initMap :-
     param(Z,mapSize),
-    succ(Z, Znew),
-    initBoarders(Znew),
+    initBoarders(Z),
     o(Xo,Yo),
     asserta(mapOrcs(Xo,Yo)),
     h(Xh,Yh),
@@ -88,13 +61,10 @@ initMap :-
     s(Xs,Ys),
     asserta(mapStart(Xs,Ys)),
     changeBallPos(Xs,Ys),
-    asserta(visited(Xs,Ys)),
-    PathLimitCount is Z*Z,
-    asserta(optimalPathCount(PathLimitCount,0)),
-    initsteps.
+    asserta(visited(Xs,Ys)).
 
 restartMap :-
-    resetMap,
+    clearMap,
     initMap.
 
 
@@ -126,55 +96,36 @@ reached(X,Y) :-
 
 % Save the path
 great(X,Y) :-
-    stepscounter(N),
-    format("Great !!! ~d ~d in ~d steps", [X,Y,N]),
-    write("\n----------Reached!!!----------\n"),
-    optimalPathCount(Best,C),
-    retractall(optimalPathCount(_,_)),
-    ((N < Best) -> (assertz(optimalPathCount(N,0))); 
-    (N == Best) -> (succ(C, Cnew), assertz(optimalPathCount(N,Cnew))))
-    ,
-    optimalPathCount(Nnew,_),
-    format("\n Great new optimal path count: ~d", [Nnew]).
-
+    write("\n----------Reached!!!----------\n").
 
 
 % This to limit the backtrack to the best result we have till now or not
-checkOptimalPath :-
-    optimalPathCount(Best,_),
-    stepscounter(N),
-    format("\n Steps for now ~d, optimal path count: ~d", [N, Best]),
+checkOptimalPath(N) :-
+    optimalPathCount(Best),
     not(N > Best).
-    % true.
 
 backtrackSearch(X,Y) :-
-    reached(X,Y) -> (asserta(visited(X,Y)), great(X,Y)); 
-    not(reached(X,Y)) ->  
-    (   asserta(visited(X,Y)),
-        not(checkOptimalPath) -> (write("\n Not optimal path, discarded"));
-        checkOptimalPath -> (move(X,Y), pass(X,Y))
-    ).
+    asserta(visited(X,Y)),
+    reached(X,Y) -> great(X,Y); not(reached(X,Y)) ->  move(X,Y),
+    pass(X,Y).
 
-randomSearch(X,Y) :-
+randomSearch(X,Y,N) :-
     true.
 
-aStarSearch(X,Y) :-
+aStarSearch(X,Y,N) :-
     true.
 
-hillClimberSearch(X,Y) :-
+hillClimberSearch(X,Y,N) :-
     true.
 
-qTableRL(X,Y) :-
+qTableRL(X,Y,N) :-
     true.
 
 pass(X,Y) :-
     true.
 
 move(X,Y) :-
-    stepscounter(N),
-    format('\n ----Step---- ~d', [N]),
     format('\n#Current in ~d ~d and deciding', [X,Y]),
-    incrsteps,
     nextUp(X,Y,Xu,Yu),
     format('\nUp to ~d ~d', [Xu, Yu]),
     backtrackSearch(Xu,Yu),
@@ -190,8 +141,7 @@ move(X,Y) :-
     nextLeft(X,Y,Xl,Yl),
     format('\nLeft to ~d ~d', [Xl, Yl]),
     backtrackSearch(Xl,Yl),
-    retract(visited(Xl,Yl)),
-    decrsteps.
+    retract(visited(Xl,Yl)).
 
 
 nextRight(X,Y, Xr, Yr) :-
@@ -226,14 +176,13 @@ changeBallPos(X,Y) :-
 main :-
     consult("input.pl"),
     s(Xs,Ys),
-    resetMap,
-    initMap,
+    initMap ,
     Ns is 0,
     backtrackSearch(Xs,Ys),
-    randomSearch(Xs,Ys),
-    aStarSearch(Xs,Ys),
-    hillClimberSearch(Xs,Ys),
-    qTableRL(Xs,Ys).
+    randomSearch(Xs,Ys,0),
+    aStarSearch(Xs,Ys,0),
+    hillClimberSearch(Xs,Ys,0),
+    qTableRL(Xs,Ys,0).
 
 % empty (X,Y):-
 %     \+ o(X,Y),
