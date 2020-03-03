@@ -14,6 +14,7 @@
 /*
     Assumptions:
         - Walls surrounded the playground, from each side there is a wall (Extra row/column).
+        - Steps in RS are considered with passing and movements.
 */
 
 param(5,mapSize).
@@ -106,10 +107,24 @@ restartMap :-
 %     X > 0, X =< Z,
 %     Y > 0, Y =< Z.
     
-valid(X,Y) :-
-    not(mapBoarders(X,Y)),
-    not(mapOrcs(X,Y)),
-    not(visited(X,Y)).
+% It is made here to add 1,2,4 as binary bits to indicate exactly which combination of problem in validation
+valid(X,Y,V) :-
+(   V is 0,
+    (
+        (mapBoarders(X,Y) == true) ->
+        (
+            V is V +1
+        );
+        (mapOrcs(X,Y) == true) ->
+        (
+            V is V +2
+        );
+        (visited(X,Y) == true) ->
+        (
+            V is V +4
+        )
+    )
+).
 
 reached(X,Y) :-
     mapTouchDown(X,Y),
@@ -150,76 +165,112 @@ checkOptimalPath :-
     % true.
 
 backtrackSearch(X,Y) :-
+(
+    asserta(visited(X,Y)),
+    reached(X,Y) -> 
     (
-        asserta(visited(X,Y)),
-        reached(X,Y) -> 
-        (
-             great(X,Y)
-        ); 
-        not(reached(X,Y)) ->  
-        (
-            not(checkOptimalPath) -> (write("\n Not optimal path, discarded"));
-            checkOptimalPath -> (move(X,Y), pass(X,Y))
-        )
-    ).
+            great(X,Y)
+    ); 
+    not(reached(X,Y)) ->  
+    (
+        not(checkOptimalPath) -> (write("\n Not optimal path, discarded"));
+        checkOptimalPath -> (move(X,Y), pass(X,Y))
+    )
+).
 
 
+% This was working on the last version of the actions. Commit: https://github.com/hany606/IAI_Spring20IU/commit/f6f9bc1164db8080f18a658b62c91c6e1f70c76b
+% move(X,Y) :-
+%     stepscounter(N),
+%     format('\n ----Step---- ~d', [N]),
+%     format('\n#Current in ~d ~d and deciding', [X,Y]),
+%     incrsteps,
+%     nextUp(X,Y,Xu,Yu),
+%     format('\nUp to ~d ~d', [Xu, Yu]),
+%     backtrackSearch(Xu,Yu),
+%     retract(visited(Xu,Yu));
+%     nextDown(X,Y,Xd,Yd),
+%     format('\nDown to ~d ~d', [Xd, Yd]),
+%     backtrackSearch(Xd,Yd),
+%     retract(visited(Xd,Yd));
+%     nextRight(X,Y,Xr,Yr),
+%     format('\nRight to ~d ~d', [Xr, Yr]),
+%     backtrackSearch(Xr,Yr),
+%     retract(visited(Xr,Yr));
+%     nextLeft(X,Y,Xl,Yl),
+%     format('\nLeft to ~d ~d', [Xl, Yl]),
+%     backtrackSearch(Xl,Yl),
+%     retract(visited(Xl,Yl)); %,
+%     decrsteps.
 
 move(X,Y) :-
     stepscounter(N),
     format('\n ----Step---- ~d', [N]),
     format('\n#Current in ~d ~d and deciding', [X,Y]),
     incrsteps,
-    nextUp(X,Y,Xu,Yu),
-    format('\nUp to ~d ~d', [Xu, Yu]),
-    backtrackSearch(Xu,Yu),
-    retract(visited(Xu,Yu));
-    nextDown(X,Y,Xd,Yd),
-    format('\nDown to ~d ~d', [Xd, Yd]),
-    backtrackSearch(Xd,Yd),
-    retract(visited(Xd,Yd));
-    nextRight(X,Y,Xr,Yr),
-    format('\nRight to ~d ~d', [Xr, Yr]),
-    backtrackSearch(Xr,Yr),
-    retract(visited(Xr,Yr));
-    nextLeft(X,Y,Xl,Yl),
-    format('\nLeft to ~d ~d', [Xl, Yl]),
-    backtrackSearch(Xl,Yl),
-    retract(visited(Xl,Yl)); %,
+    nextUp(X,Y,Xu,Yu,Vu),
+    ((Vu == 1) ->
+        format('\nUp to ~d ~d', [Xu, Yu]),
+        backtrackSearch(Xu,Yu),
+        retract(visited(Xu,Yu))
+    );
+    nextDown(X,Y,Xd,Yd,Vd),
+    ((Vd == 1) ->
+
+        format('\nDown to ~d ~d', [Xd, Yd]),
+        backtrackSearch(Xd,Yd),
+        retract(visited(Xd,Yd))
+    );
+    nextRight(X,Y,Xr,Yr,Vr),
+    ((Vr == 1) ->
+        format('\nRight to ~d ~d', [Xr, Yr]),
+        backtrackSearch(Xr,Yr),
+        retract(visited(Xr,Yr))
+    );
+    nextLeft(X,Y,Xl,Yl,Vl),
+    ((Vl == 1) ->
+        format('\nLeft to ~d ~d', [Xl, Yl]),
+        backtrackSearch(Xl,Yl),
+        retract(visited(Xl,Yl))
+    ),
     decrsteps.
 
-nextUp(X,Y, Xu, Yu) :-
+nextUp(X,Y,Xu,Yu,V) :-
 (
     succ(Y, Ynew), Xu is X,
     (
-        valid(X,Ynew) -> Yu is Ynew;
-        Yu is Y
+        valid(X,Ynew,Vv),
+        (Vv == 0) -> Yu is Ynew, V is 1;
+        Yu is Y, V is 0
     )
 ).
     
-nextDown(X,Y, Xd, Yd) :-
+nextDown(X,Y,Xd,Yd,V) :-
 (
     succ(Ynew, Y), Xd is X,
     (
-        valid(X,Ynew) -> Yd is Ynew; 
+        valid(X,Ynew,Vv),
+        (Vv == 0)  -> Yd is Ynew, V is 1; 
         Yd is Y
     )
 ).
 
 
-nextRight(X,Y, Xr, Yr) :-
+nextRight(X,Y,Xr,Yr,V) :-
 (
     succ(X, Xnew), Yr is Y,
     (
-        valid(Xnew,Y) -> Xr is Xnew;
+        valid(Xnew,Y,Vv),
+        (Vv == 0) -> Xr is Xnew, V is 1;
         Xr is X
     )
 ).
-nextLeft(X,Y, Xl, Yl) :-
+nextLeft(X,Y,Xl,Yl,V) :-
 (
     succ(Xnew, X), Yl is Y,
     (
-        valid(Xnew,Y) -> Xl is Xnew; 
+        valid(Xnew,Y,Vv),
+        (Vv == 0) -> Xl is Xnew, V is 1; 
         Xl is X
     )
 ).
@@ -234,13 +285,16 @@ changeBallPos(X,Y) :-
     assert(ballPos(X,Y)).
 
 
-randomSearch(X,Y,0) :-
-    !.
+randomSearch(_,_,0) :-
+    format("\nReached the last iteration\n")
+    ,!.
 
 randomSearch(X,Y,N) :-
+    param(M,numEpisodesRS),
+    format(" \n\t########## Random Search iteration #~d ##########\t\n ", [M-N+1]),
+    initsteps,
     randomSearch(X,Y),
     succ(Nnew, N),
-    initsteps,
     randomSearch(X,Y,Nnew).
 
 % Ranges are made as the step is 1/12 ~= 0.0833 and the random variable is from std normal distribution ~ [0,1]
@@ -263,24 +317,24 @@ randomSearch(X,Y) :-
         (
             (R >= 0, R < 0.083) ->
             (
-                nextUp(X,Y,Xnew,Ynew),
+                nextUp(X,Y,Xnew,Ynew,_),
                 format('\nUp to ~d ~d', [Xnew, Ynew])
             );  
             (R >= 0.083, R < 0.1666) ->
             (
-                nextDown(X,Y,Xnew,Ynew),
+                nextDown(X,Y,Xnew,Ynew,_),
                 format('\nDown to ~d ~d', [Xnew, Ynew])
 
             );
             (R >= 0.1666, R < 0.2499) ->
             (
-                nextRight(X,Y,Xnew,Ynew),
+                nextRight(X,Y,Xnew,Ynew,_),
                 format('\nRight to ~d ~d', [Xnew, Ynew])
             );
             %0.3332
             (R >= 0.2499, R =< 1) -> 
             (
-                nextLeft(X,Y,Xnew,Ynew),
+                nextLeft(X,Y,Xnew,Ynew,_),
                 format('\nLeft to ~d ~d', [Xnew, Ynew])
             )%;
             % (R >= 0.3332, R < 0.4165) ->
