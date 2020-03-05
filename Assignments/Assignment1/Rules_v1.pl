@@ -12,10 +12,8 @@
 */
 
 /*
-    Assumptions & Info to declare:
+    Assumptions:
         - BT => Backtrack, RS => Random Search, HC => HillClimber, AS => A*, QT => Q-Table.
-        - utils.pl has some auxilary functions (e.g. printing list, ....etc).
-        - Cost in Backtrack is the number of steps in the path.
         - Walls surrounded the playground, from each side there is a wall (Extra row/column).
         - Steps in RS are considered with passing and movements.
         - There is another file called counters.pl that is used to modularity of the code to write there only the counters rules
@@ -35,7 +33,7 @@ param(10, numEpisodesRS).
 
 :- dynamic ballPos/2.
 :- dynamic visited/2.
-:- dynamic optimalPath/1.
+:- dynamic path/2.
 :- dynamic optimalPathCount/2.
 
 
@@ -84,7 +82,6 @@ initMap :-
     asserta(visited(Xs,Ys)),
     PathLimitCount is Z*Z,
     asserta(optimalPathCount(PathLimitCount,0)),
-    retractall(optimalPath(_)),
     initsteps.
 
 restartMap :-
@@ -98,12 +95,7 @@ restartMap :-
 %     X > 0, X =< Z,
 %     Y > 0, Y =< Z.
     
-inPath(X,Y,P,R) :-
-    count(P,X,Y,C),
-    (C =< 1) -> R is 0;     % as the visited cell is in the path is two times in the path at most (in, out)
-    R is 1.
-
-valid(X,Y,V,P) :-
+valid(X,Y,V) :-
 (
     (mapBoarders(X,Y)) ->
     (
@@ -115,8 +107,7 @@ valid(X,Y,V,P) :-
         succ(1,V),
         format('\n(~d, ~d) is an Orc cell', [X,Y])
     );
-    inPath(X,Y,P,R),
-    (R == 1) ->
+    (visited(X,Y)) ->
     (
         succ(2,V),
         format('\n(~d, ~d) is a visited cell', [X,Y])
@@ -127,9 +118,9 @@ valid(X,Y,V,P) :-
 
 reached(X,Y) :-
     mapTouchDown(X,Y),
-    % visited(Xv,Yv),       % developed old and efficient way to track the path
-    % asserta(path(Xv,Yv)),
-    write('\n----------Reached!!!----------\n').
+    visited(Xv,Yv),
+    asserta(path(Xv,Yv)),
+    write("\n----------Reached!!!----------\n").
 
 
 % This only will make it search once
@@ -141,128 +132,150 @@ reached(X,Y) :-
 
 
 % Save the path
-saveOptimalPath(X,Y,P,N) :-
-    format('\nGreat !!! ~d ~d in ~d steps', [X,Y,N]),
-    format('\nPrinting all the path in a reverse order from the end to the start\n'),
-    printlst(P),
-    format('\n----------Reached!!!----------\n'),
+saveOptimalPath(X,Y) :-
+    stepscounter(N),
+    format("Great !!! ~d ~d in ~d steps", [X,Y,N]),
+    write("\n----------Reached!!!----------\n"),
     optimalPathCount(Best,C),
     retractall(optimalPathCount(_,_)),
     (
-        (N < Best) -> 
-        (
-            retractall(optimalPath(_)),
-            assertz(optimalPath(P)),
-            assertz(optimalPathCount(N,0)),
-            format("\n Great! New optimal path with less path cost : ~d with muliplicity ~d", [N, 0])
-        ); 
-        (N == Best) -> (
-            assertz(optimalPath(P)),
-            succ(C, Cnew), 
-            assertz(optimalPathCount(N,Cnew)),
-            format("\n Great! New optimal path count with the same old cost: ~d with muliplicity ~d", [N, Cnew])
-        )
+        (N < Best) -> (assertz(optimalPathCount(N,0))); 
+        (N == Best) -> (succ(C, Cnew), assertz(optimalPathCount(N,Cnew)))
     )
-    ,optimalPathCount(Nnew,Cm).
+    ,optimalPathCount(Nnew,_),
+    format("\n Great new optimal path count: ~d", [Nnew]).
 
 
 
 % This to limit the backtrack to the best result we have till now or not
-isOptimalPath(N) :-
+checkOptimalPath :-
     optimalPathCount(Best,_),
-    format('\n Steps for now ~d, optimal path count: ~d', [N, Best]),
+    stepscounter(N),
+    format("\n Steps for now ~d, optimal path count: ~d", [N, Best]),
     not(N > Best).
     % true.
 
-
-
-backtrackSearch(X,Y,P) :-
+backtrackSearch(X,Y) :-
 (
-    lengthlst(P,Nn),
-    N is (div(Nn,4)),
+    incrsteps,
+    asserta(visited(X,Y)),
+    reached(X,Y) -> 
     (
-        reached(X,Y) -> 
-        (
-            saveOptimalPath(X,Y,P,N)
-        ); 
-        (
-            not(isOptimalPath(N)) -> (
-                format('\n \t XXXXXXXXXX Not optimal path, discarded XXXXXXXXXX \n Reason: Number of current steps: ~d',[N])
-            );
-            (move(X,Y,[X,Y|P],N), pass(X,Y))
-        )
-    )    
+            saveOptimalPath(X,Y)
+    ); 
+    not(reached(X,Y)) ->  
+    (
+        not(checkOptimalPath) -> (write("\n \t XXXXXXXXXX Not optimal path, discarded XXXXXXXXXX \n"));
+        checkOptimalPath -> (move(X,Y), pass(X,Y))
+    )
+    ,decrsteps
 ).
 
 
-move(X,Y,P,N) :-
-(
+% This was working on the last version of the actions. Commit: https://github.com/hany606/IAI_Spring20IU/commit/f6f9bc1164db8080f18a658b62c91c6e1f70c76b
+% move(X,Y) :-
+%     stepscounter(N),
+%     format('\n ----Step---- ~d', [N]),
+%     format('\n#Current in ~d ~d and deciding', [X,Y]),
+%     incrsteps,
+%     nextUp(X,Y,Xu,Yu),
+%     format('\nUp to ~d ~d', [Xu, Yu]),
+%     backtrackSearch(Xu,Yu),
+%     retract(visited(Xu,Yu));
+%     nextDown(X,Y,Xd,Yd),
+%     format('\nDown to ~d ~d', [Xd, Yd]),
+%     backtrackSearch(Xd,Yd),
+%     retract(visited(Xd,Yd));
+%     nextRight(X,Y,Xr,Yr),
+%     format('\nRight to ~d ~d', [Xr, Yr]),
+%     backtrackSearch(Xr,Yr),
+%     retract(visited(Xr,Yr));
+%     nextLeft(X,Y,Xl,Yl),
+%     format('\nLeft to ~d ~d', [Xl, Yl]),
+%     backtrackSearch(Xl,Yl),
+%     retract(visited(Xl,Yl)); %,
+%     decrsteps.
+
+move(X,Y) :-
+    stepscounter(N),
     format('\n ----Step---- ~d', [N]),
     format('\n#Current in ~d ~d and deciding, Check Up', [X,Y]),
-    nextUp(X,Y,Xu,Yu,Vu,P),
+    nextUp(X,Y,Xu,Yu,Vu),
     ((Vu == 1) ->
-        Nnew is N +1,
+        % incrsteps,
+        stepscounter(Nnew),
         format('\nUp to ~d ~d in step ~d', [Xu, Yu, Nnew]),
-        backtrackSearch(Xu,Yu, [Xu,Yu|P])
+        backtrackSearch(Xu,Yu),
+        retract(visited(Xu,Yu))
+        % ,decrsteps
     );
     format('\n#Current in ~d ~d and deciding, Check Down', [X,Y]),
-    nextDown(X,Y,Xd,Yd,Vd,P),
+    nextDown(X,Y,Xd,Yd,Vd),
     ((Vd == 1) ->
-        Nnew is N +1,
+        % incrsteps,
+        stepscounter(Nnew),
         format('\nDown to ~d ~d in step ~d', [Xd, Yd, Nnew]),
-        backtrackSearch(Xd,Yd, [Xd,Yd|P])
+        backtrackSearch(Xd,Yd),
+        retract(visited(Xd,Yd))
+        % ,decrsteps
     );
     format('\n#Current in ~d ~d and deciding, Check Right', [X,Y]),
-    nextRight(X,Y,Xr,Yr,Vr,P),
+    nextRight(X,Y,Xr,Yr,Vr),
     ((Vr == 1) ->
-        Nnew is N +1,
+        % incrsteps,
+        stepscounter(Nnew),
         format('\nRight to ~d ~d in step ~d', [Xr, Yr, Nnew]),
-        backtrackSearch(Xr,Yr, [Xr,Yr|P])
+        backtrackSearch(Xr,Yr),
+        retract(visited(Xr,Yr))
+        % ,decrsteps
     );
     format('\n#Current in ~d ~d and deciding, Check Left', [X,Y]),
-    nextLeft(X,Y,Xl,Yl,Vl,P),
+    nextLeft(X,Y,Xl,Yl,Vl),
     ((Vl == 1) ->
-        Nnew is N +1,
+        % incrsteps,
+        stepscounter(Nnew),
         format('\nLeft to ~d ~d in step ~d', [Xl, Yl, Nnew]),
-        backtrackSearch(Xl,Yl, [Xl,Yl|P])
+        backtrackSearch(Xl,Yl),
+        retract(visited(Xl,Yl))
+        % ,decrsteps
     )
-). 
-
-nextUp(X,Y,Xu,Yu,V,P) :-
+    % ,decrsteps
+    . 
+nextUp(X,Y,Xu,Yu,V) :-
 (
     succ(Y, Ynew), Xu is X,
     (
-        valid(X,Ynew,Vv,P),
+        valid(X,Ynew,Vv),
         (Vv == 0) -> Yu is Ynew, V is 1;
         Yu is Y, V is 0
     )
 ).
     
-nextDown(X,Y,Xd,Yd,V,P) :-
+nextDown(X,Y,Xd,Yd,V) :-
 (
     succ(Ynew, Y), Xd is X,
     (
-        valid(X,Ynew,Vv,P),
+        valid(X,Ynew,Vv),
         (Vv == 0)  -> Yd is Ynew, V is 1; 
         Yd is Y
     )
 ).
 
 
-nextRight(X,Y,Xr,Yr,V,P) :-
+nextRight(X,Y,Xr,Yr,V) :-
 (
     succ(X, Xnew), Yr is Y,
     (
-        valid(Xnew,Y,Vv,P),
+        valid(Xnew,Y,Vv),
         (Vv == 0) -> Xr is Xnew, V is 1;
         Xr is X
     )
 ).
-nextLeft(X,Y,Xl,Yl,V,P) :-
+nextLeft(X,Y,Xl,Yl,V) :-
 (
     succ(Xnew, X), Yl is Y,
     (
-        valid(Xnew,Y,Vv,P),
+        valid(Xnew,Y,Vv),
         (Vv == 0) -> Xl is Xnew, V is 1; 
         Xl is X
     )
@@ -272,8 +285,6 @@ nextLeft(X,Y,Xl,Yl,V,P) :-
     % validation,
     % pass to the human on that line,
     % change the y to the coordinate.
-
-
 
 changeBallPos(X,Y) :-
     retractall(ballPos(_,_)),
@@ -386,7 +397,6 @@ rsStatistics :-
 initMain :-
     consult("input.pl"),
     consult("counters.pl"),
-    consult("utils.pl"),
     resetMap,
     initMap,
     initrscounter.
@@ -396,8 +406,9 @@ main :-
     initMain
     ,s(Xs,Ys)
     ,Ns is 0
-    ,backtrackSearch(Xs,Ys,[])
-    ,format('\n--------------------------------------------------------------\n--------------------------------------------------------------\n--------------------------------------------------------------\n')
+    ,backtrackSearch(Xs,Ys)
+    ,stepscounter(S)
+    ,format('Counter steps: ~d', [S])
     % param(NRS_episodes, numEpisodesRS)
     % ,randomSearch(Xs,Ys,NRS_episodes)
     % ,rsStatistics

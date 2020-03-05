@@ -1,0 +1,144 @@
+
+ Steps for now 1, optimal path count: 25
+ Steps for now 1, optimal path count: 25
+ ----Step---- 1
+#Current in 2 3 and deciding, Check Up
+Up to 2 4 in step 1
+ Steps for now 2, optimal path count: 25
+ Steps for now 2, optimal path count: 25
+ ----Step---- 2
+#Current in 2 4 and deciding, Check Up
+Up to 2 5 in step 2
+ Steps for now 3, optimal path count: 25
+ Steps for now 3, optimal path count: 25
+ ----Step---- 3
+#Current in 2 5 and deciding, Check Up
+(2, 6) is a boarder cell
+#Current in 2 5 and deciding, Check Down
+(2, 4) is a visited cell
+#Current in 2 5 and deciding, Check Right
+Right to 3 5 in step 3
+ Steps for now 4, optimal path count: 25
+ Steps for now 4, optimal path count: 25
+ ----Step---- 4
+#Current in 3 5 and deciding, Check Up
+(3, 6) is a boarder cell
+#Current in 3 5 and deciding, Check Down
+Down to 3 4 in step 4
+ Steps for now 5, optimal path count: 25
+ Steps for now 5, optimal path count: 25
+ ----Step---- 5
+#Current in 3 4 and deciding, Check Up
+(3, 5) is a visited cell
+#Current in 3 4 and deciding, Check Down
+(3, 3) is an Orc cell
+#Current in 3 4 and deciding, Check Right
+Right to 4 4 in step 5
+ Steps for now 6, optimal path count: 25
+ Steps for now 6, optimal path count: 25
+ ----Step---- 6
+#Current in 4 4 and deciding, Check Up
+Up to 4 5 in step 6
+ Steps for now 7, optimal path count: 25
+ Steps for now 7, optimal path count: 25
+ ----Step---- 7
+#Current in 4 5 and deciding, Check Up
+(4, 6) is a boarder cell
+#Current in 4 5 and deciding, Check Down
+(4, 4) is a visited cell
+#Current in 4 5 and deciding, Check Right
+Right to 5 5 in step 7
+ Steps for now 8, optimal path count: 25
+ Steps for now 8, optimal path count: 25
+ ----Step---- 8
+#Current in 5 5 and deciding, Check Up
+(5, 6) is a boarder cell
+#Current in 5 5 and deciding, Check Down
+Down to 5 4 in step 8
+ Steps for now 9, optimal path count: 25
+ Steps for now 9, optimal path count: 25
+ ----Step---- 9
+#Current in 5 4 and deciding, Check Up
+(5, 5) is a visited cell
+#Current in 5 4 and deciding, Check Down
+Down to 5 3 in step 9
+ Steps for now 10, optimal path count: 25
+ Steps for now 10, optimal path count: 25
+ ----Step---- 10
+#Current in 5 3 and deciding, Check Up
+(5, 4) is a visited cell
+#Current in 5 3 and deciding, Check Down
+Down to 5 2 in step 10
+ Steps for now 11, optimal path count: 25
+ Steps for now 11, optimal path count: 25
+ ----Step---- 11
+#Current in 5 2 and deciding, Check Up
+(5, 3) is a visited cell
+#Current in 5 2 and deciding, Check Down
+Down to 5 1 in step 11
+ Steps for now 12, optimal path count: 25
+ Steps for now 12, optimal path count: 25
+ ----Step---- 12
+#Current in 5 1 and deciding, Check Up
+(5, 2) is a visited cell
+#Current in 5 1 and deciding, Check Down
+(5, 0) is a boarder cell
+#Current in 5 1 and deciding, Check Right
+(6, 1) is a boarder cell
+#Current in 5 1 and deciding, Check Left
+Left to 4 1 in step 12
+ Steps for now 13, optimal path count: 25
+ Steps for now 13, optimal path count: 25
+ ----Step---- 13
+#Current in 4 1 and deciding, Check Up
+Up to 4 2 in step 13
+ Steps for now 14, optimal path count: 25
+ Steps for now 14, optimal path count: 25
+ ----Step---- 14
+#Current in 4 2 and deciding, Check Up
+Up to 4 3 in step 14
+ Steps for now 15, optimal path count: 25
+ Steps for now 15, optimal path count: 25
+ ----Step---- 15
+#Current in 4 3 and deciding, Check Up
+(4, 4) is a visited cell
+#Current in 4 3 and deciding, Check Down
+(4, 2) is a visited cell
+#Current in 4 3 and deciding, Check Right
+(5, 3) is a visited cell
+#Current in 4 3 and deciding, Check Left
+(3, 3) is an Orc cell
+#Current in 4 2 and deciding, Check Down
+(4, 1) is a visited cell
+#Current in 4 2 and deciding, Check Right
+(5, 2) is a visited cell
+#Current in 4 2 and deciding, Check Left
+Left to 3 2 in step 15
+ Steps for now 16, optimal path count: 25
+ Steps for now 16, optimal path count: 25
+ ----Step---- 16
+#Current in 3 2 and deciding, Check Up
+(3, 3) is an Orc cell
+#Current in 3 2 and deciding, Check Down
+Down to 3 1 in step 16
+ Steps for now 17, optimal path count: 25
+ Steps for now 17, optimal path count: 25
+ ----Step---- 17
+#Current in 3 1 and deciding, Check Up
+(3, 2) is a visited cell
+#Current in 3 1 and deciding, Check Down
+(3, 0) is a boarder cell
+#Current in 3 1 and deciding, Check Right
+(4, 1) is a visited cell
+#Current in 3 1 and deciding, Check Left
+Left to 2 1 in step 17
+ Steps for now 18, optimal path count: 25
+ Steps for now 18, optimal path count: 25
+ ----Step---- 18
+#Current in 2 1 and deciding, Check Up
+Up to 2 2 in step 18
+----------Reached!!!----------
+Great !!! 2 2 in 19 steps
+----------Reached!!!----------
+
+ Great new optimal path count: 19Counter steps: 2
