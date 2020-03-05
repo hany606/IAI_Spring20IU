@@ -1,144 +1,540 @@
 
- Steps for now 1, optimal path count: 25
- Steps for now 1, optimal path count: 25
- ----Step---- 1
+ Steps for now 0, optimal path count: 25
+ ----Step---- 0
 #Current in 2 3 and deciding, Check Up
 Up to 2 4 in step 1
- Steps for now 2, optimal path count: 25
- Steps for now 2, optimal path count: 25
- ----Step---- 2
+ Steps for now 1, optimal path count: 25
+ ----Step---- 1
 #Current in 2 4 and deciding, Check Up
 Up to 2 5 in step 2
- Steps for now 3, optimal path count: 25
- Steps for now 3, optimal path count: 25
- ----Step---- 3
+ Steps for now 2, optimal path count: 25
+ ----Step---- 2
 #Current in 2 5 and deciding, Check Up
 (2, 6) is a boarder cell
 #Current in 2 5 and deciding, Check Down
 (2, 4) is a visited cell
 #Current in 2 5 and deciding, Check Right
 Right to 3 5 in step 3
- Steps for now 4, optimal path count: 25
- Steps for now 4, optimal path count: 25
- ----Step---- 4
-#Current in 3 5 and deciding, Check Up
-(3, 6) is a boarder cell
-#Current in 3 5 and deciding, Check Down
-Down to 3 4 in step 4
- Steps for now 5, optimal path count: 25
- Steps for now 5, optimal path count: 25
- ----Step---- 5
-#Current in 3 4 and deciding, Check Up
-(3, 5) is a visited cell
-#Current in 3 4 and deciding, Check Down
-(3, 3) is an Orc cell
-#Current in 3 4 and deciding, Check Right
-Right to 4 4 in step 5
- Steps for now 6, optimal path count: 25
- Steps for now 6, optimal path count: 25
- ----Step---- 6
-#Current in 4 4 and deciding, Check Up
-Up to 4 5 in step 6
- Steps for now 7, optimal path count: 25
- Steps for now 7, optimal path count: 25
- ----Step---- 7
-#Current in 4 5 and deciding, Check Up
-(4, 6) is a boarder cell
-#Current in 4 5 and deciding, Check Down
-(4, 4) is a visited cell
-#Current in 4 5 and deciding, Check Right
-Right to 5 5 in step 7
- Steps for now 8, optimal path count: 25
- Steps for now 8, optimal path count: 25
- ----Step---- 8
-#Current in 5 5 and deciding, Check Up
-(5, 6) is a boarder cell
-#Current in 5 5 and deciding, Check Down
-Down to 5 4 in step 8
- Steps for now 9, optimal path count: 25
- Steps for now 9, optimal path count: 25
- ----Step---- 9
-#Current in 5 4 and deciding, Check Up
-(5, 5) is a visited cell
-#Current in 5 4 and deciding, Check Down
-Down to 5 3 in step 9
- Steps for now 10, optimal path count: 25
- Steps for now 10, optimal path count: 25
- ----Step---- 10
-#Current in 5 3 and deciding, Check Up
-(5, 4) is a visited cell
-#Current in 5 3 and deciding, Check Down
-Down to 5 2 in step 10
- Steps for now 11, optimal path count: 25
- Steps for now 11, optimal path count: 25
- ----Step---- 11
-#Current in 5 2 and deciding, Check Up
-(5, 3) is a visited cell
-#Current in 5 2 and deciding, Check Down
-Down to 5 1 in step 11
- Steps for now 12, optimal path count: 25
- Steps for now 12, optimal path count: 25
- ----Step---- 12
-#Current in 5 1 and deciding, Check Up
-(5, 2) is a visited cell
-#Current in 5 1 and deciding, Check Down
-(5, 0) is a boarder cell
-#Current in 5 1 and deciding, Check Right
-(6, 1) is a boarder cell
-#Current in 5 1 and deciding, Check Left
-Left to 4 1 in step 12
- Steps for now 13, optimal path count: 25
- Steps for now 13, optimal path count: 25
- ----Step---- 13
-#Current in 4 1 and deciding, Check Up
-Up to 4 2 in step 13
- Steps for now 14, optimal path count: 25
- Steps for now 14, optimal path count: 25
- ----Step---- 14
-#Current in 4 2 and deciding, Check Up
-Up to 4 3 in step 14
- Steps for now 15, optimal path count: 25
- Steps for now 15, optimal path count: 25
- ----Step---- 15
-#Current in 4 3 and deciding, Check Up
-(4, 4) is a visited cell
-#Current in 4 3 and deciding, Check Down
-(4, 2) is a visited cell
-#Current in 4 3 and deciding, Check Right
-(5, 3) is a visited cell
-#Current in 4 3 and deciding, Check Left
-(3, 3) is an Orc cell
-#Current in 4 2 and deciding, Check Down
-(4, 1) is a visited cell
-#Current in 4 2 and deciding, Check Right
-(5, 2) is a visited cell
-#Current in 4 2 and deciding, Check Left
-Left to 3 2 in step 15
- Steps for now 16, optimal path count: 25
- Steps for now 16, optimal path count: 25
- ----Step---- 16
-#Current in 3 2 and deciding, Check Up
-(3, 3) is an Orc cell
-#Current in 3 2 and deciding, Check Down
-Down to 3 1 in step 16
- Steps for now 17, optimal path count: 25
- Steps for now 17, optimal path count: 25
- ----Step---- 17
-#Current in 3 1 and deciding, Check Up
-(3, 2) is a visited cell
-#Current in 3 1 and deciding, Check Down
-(3, 0) is a boarder cell
-#Current in 3 1 and deciding, Check Right
-(4, 1) is a visited cell
-#Current in 3 1 and deciding, Check Left
-Left to 2 1 in step 17
- Steps for now 18, optimal path count: 25
- Steps for now 18, optimal path count: 25
- ----Step---- 18
-#Current in 2 1 and deciding, Check Up
-Up to 2 2 in step 18
-----------Reached!!!----------
-Great !!! 2 2 in 19 steps
 ----------Reached!!!----------
 
- Great new optimal path count: 19Counter steps: 2
+Great !!! 3 5 in 3 steps
+Printing all the path in a reverse order from the end to the start
+(3,5), (2,5), (2,5), (2,4), (2,4), (2,3), 
+----------Reached!!!----------
+
+ Great! New optimal path with less path cost : 3 with muliplicity 0
+--------------------------------------------------------------
+--------------------------------------------------------------
+--------------------------------------------------------------
+
+	########## Random Search iteration #1 ##########	
+
+ ----Step---- 0
+#Current in 2 3 and deciding
+Down to 2 2
+ ----Step---- 0
+#Current in 2 2 and deciding
+Left to 1 2
+ ----Step---- 1
+#Current in 1 2 and deciding
+Up to 1 3
+ ----Step---- 1
+#Current in 1 3 and deciding
+(0, 3) is a boarder cell
+Left to 1 3
+ ----Step---- 2
+#Current in 1 3 and deciding
+Down to 1 2
+ ----Step---- 2
+#Current in 1 2 and deciding
+Up to 1 3
+ ----Step---- 3
+#Current in 1 3 and deciding
+(0, 3) is a boarder cell
+Left to 1 3
+ ----Step---- 3
+#Current in 1 3 and deciding
+Right to 2 3
+ ----Step---- 4
+#Current in 2 3 and deciding
+(3, 3) is an Orc cell
+Right to 2 3
+ ----Step---- 4
+#Current in 2 3 and deciding
+Left to 1 3
+ ----Step---- 5
+#Current in 1 3 and deciding
+Right to 2 3
+ ----Step---- 5
+#Current in 2 3 and deciding
+Left to 1 3
+ ----Step---- 6
+#Current in 1 3 and deciding
+Up to 1 4
+ ----Step---- 6
+#Current in 1 4 and deciding
+(0, 4) is a boarder cell
+Left to 1 4
+ ----Step---- 7
+#Current in 1 4 and deciding
+Right to 2 4
+ ----Step---- 7
+#Current in 2 4 and deciding
+Up to 2 5
+ ----Step---- 8
+#Current in 2 5 and deciding
+Down to 2 4
+ ----Step---- 8
+#Current in 2 4 and deciding
+Down to 2 3
+ ----Step---- 9
+#Current in 2 3 and deciding
+Down to 2 2
+ ----Step---- 9
+#Current in 2 2 and deciding
+Down to 2 1
+ ----Step---- 10
+ Reached Maximum number of steps
+	########## Random Search iteration #2 ##########	
+
+ ----Step---- 0
+#Current in 2 3 and deciding
+(3, 3) is an Orc cell
+Right to 2 3
+ ----Step---- 0
+#Current in 2 3 and deciding
+Left to 1 3
+ ----Step---- 1
+#Current in 1 3 and deciding
+Right to 2 3
+ ----Step---- 1
+#Current in 2 3 and deciding
+Up to 2 4
+ ----Step---- 2
+#Current in 2 4 and deciding
+Up to 2 5
+ ----Step---- 2
+#Current in 2 5 and deciding
+Down to 2 4
+ ----Step---- 3
+#Current in 2 4 and deciding
+Up to 2 5
+ ----Step---- 3
+#Current in 2 5 and deciding
+Right to 3 5
+ ----Step---- 4
+----------Reached!!!----------
+
+ Reached the goal
+	########## Random Search iteration #3 ##########	
+
+ ----Step---- 0
+#Current in 2 3 and deciding
+Up to 2 4
+ ----Step---- 0
+#Current in 2 4 and deciding
+Left to 1 4
+ ----Step---- 1
+#Current in 1 4 and deciding
+Up to 1 5
+ ----Step---- 1
+#Current in 1 5 and deciding
+Down to 1 4
+ ----Step---- 2
+#Current in 1 4 and deciding
+(0, 4) is a boarder cell
+Left to 1 4
+ ----Step---- 2
+#Current in 1 4 and deciding
+Up to 1 5
+ ----Step---- 3
+#Current in 1 5 and deciding
+(1, 6) is a boarder cell
+Up to 1 5
+ ----Step---- 3
+#Current in 1 5 and deciding
+Down to 1 4
+ ----Step---- 4
+#Current in 1 4 and deciding
+(0, 4) is a boarder cell
+Left to 1 4
+ ----Step---- 4
+#Current in 1 4 and deciding
+(0, 4) is a boarder cell
+Left to 1 4
+ ----Step---- 5
+#Current in 1 4 and deciding
+Down to 1 3
+ ----Step---- 5
+#Current in 1 3 and deciding
+Down to 1 2
+ ----Step---- 6
+#Current in 1 2 and deciding
+Down to 1 1
+ ----Step---- 6
+#Current in 1 1 and deciding
+(0, 1) is a boarder cell
+Left to 1 1
+ ----Step---- 7
+#Current in 1 1 and deciding
+(0, 1) is a boarder cell
+Left to 1 1
+ ----Step---- 7
+#Current in 1 1 and deciding
+(0, 1) is a boarder cell
+Left to 1 1
+ ----Step---- 8
+#Current in 1 1 and deciding
+(1, 0) is a boarder cell
+Down to 1 1
+ ----Step---- 8
+#Current in 1 1 and deciding
+(0, 1) is a boarder cell
+Left to 1 1
+ ----Step---- 9
+#Current in 1 1 and deciding
+Right to 2 1
+ ----Step---- 9
+#Current in 2 1 and deciding
+Right to 3 1
+ ----Step---- 10
+ Reached Maximum number of steps
+	########## Random Search iteration #4 ##########	
+
+ ----Step---- 0
+#Current in 2 3 and deciding
+Up to 2 4
+ ----Step---- 0
+#Current in 2 4 and deciding
+Right to 3 4
+ ----Step---- 1
+#Current in 3 4 and deciding
+Right to 4 4
+ ----Step---- 1
+#Current in 4 4 and deciding
+Up to 4 5
+ ----Step---- 2
+#Current in 4 5 and deciding
+Down to 4 4
+ ----Step---- 2
+#Current in 4 4 and deciding
+Left to 3 4
+ ----Step---- 3
+#Current in 3 4 and deciding
+Up to 3 5
+ ----Step---- 3
+----------Reached!!!----------
+
+ Reached the goal
+	########## Random Search iteration #5 ##########	
+
+ ----Step---- 0
+#Current in 2 3 and deciding
+Down to 2 2
+ ----Step---- 0
+#Current in 2 2 and deciding
+Up to 2 3
+ ----Step---- 1
+#Current in 2 3 and deciding
+Left to 1 3
+ ----Step---- 1
+#Current in 1 3 and deciding
+Down to 1 2
+ ----Step---- 2
+#Current in 1 2 and deciding
+Up to 1 3
+ ----Step---- 2
+#Current in 1 3 and deciding
+Right to 2 3
+ ----Step---- 3
+#Current in 2 3 and deciding
+(3, 3) is an Orc cell
+Right to 2 3
+ ----Step---- 3
+#Current in 2 3 and deciding
+Left to 1 3
+ ----Step---- 4
+#Current in 1 3 and deciding
+(0, 3) is a boarder cell
+Left to 1 3
+ ----Step---- 4
+#Current in 1 3 and deciding
+Down to 1 2
+ ----Step---- 5
+#Current in 1 2 and deciding
+Up to 1 3
+ ----Step---- 5
+#Current in 1 3 and deciding
+(0, 3) is a boarder cell
+Left to 1 3
+ ----Step---- 6
+#Current in 1 3 and deciding
+Down to 1 2
+ ----Step---- 6
+#Current in 1 2 and deciding
+Up to 1 3
+ ----Step---- 7
+#Current in 1 3 and deciding
+Down to 1 2
+ ----Step---- 7
+#Current in 1 2 and deciding
+Up to 1 3
+ ----Step---- 8
+#Current in 1 3 and deciding
+Up to 1 4
+ ----Step---- 8
+#Current in 1 4 and deciding
+Down to 1 3
+ ----Step---- 9
+#Current in 1 3 and deciding
+Down to 1 2
+ ----Step---- 9
+#Current in 1 2 and deciding
+(0, 2) is a boarder cell
+Left to 1 2
+ ----Step---- 10
+ Reached Maximum number of steps
+	########## Random Search iteration #6 ##########	
+
+ ----Step---- 0
+#Current in 2 3 and deciding
+Down to 2 2
+ ----Step---- 0
+#Current in 2 2 and deciding
+Down to 2 1
+ ----Step---- 1
+#Current in 2 1 and deciding
+Up to 2 2
+ ----Step---- 1
+#Current in 2 2 and deciding
+Up to 2 3
+ ----Step---- 2
+#Current in 2 3 and deciding
+Up to 2 4
+ ----Step---- 2
+#Current in 2 4 and deciding
+Down to 2 3
+ ----Step---- 3
+#Current in 2 3 and deciding
+Up to 2 4
+ ----Step---- 3
+#Current in 2 4 and deciding
+Left to 1 4
+ ----Step---- 4
+#Current in 1 4 and deciding
+Right to 2 4
+ ----Step---- 4
+#Current in 2 4 and deciding
+Down to 2 3
+ ----Step---- 5
+#Current in 2 3 and deciding
+Left to 1 3
+ ----Step---- 5
+#Current in 1 3 and deciding
+Up to 1 4
+ ----Step---- 6
+#Current in 1 4 and deciding
+Up to 1 5
+ ----Step---- 6
+#Current in 1 5 and deciding
+Down to 1 4
+ ----Step---- 7
+#Current in 1 4 and deciding
+Down to 1 3
+ ----Step---- 7
+#Current in 1 3 and deciding
+Right to 2 3
+ ----Step---- 8
+#Current in 2 3 and deciding
+Up to 2 4
+ ----Step---- 8
+#Current in 2 4 and deciding
+Up to 2 5
+ ----Step---- 9
+#Current in 2 5 and deciding
+Down to 2 4
+ ----Step---- 9
+#Current in 2 4 and deciding
+Right to 3 4
+ ----Step---- 10
+ Reached Maximum number of steps
+	########## Random Search iteration #7 ##########	
+
+ ----Step---- 0
+#Current in 2 3 and deciding
+Up to 2 4
+ ----Step---- 0
+#Current in 2 4 and deciding
+Right to 3 4
+ ----Step---- 1
+#Current in 3 4 and deciding
+Up to 3 5
+ ----Step---- 1
+----------Reached!!!----------
+
+ Reached the goal
+	########## Random Search iteration #8 ##########	
+
+ ----Step---- 0
+#Current in 2 3 and deciding
+Left to 1 3
+ ----Step---- 0
+#Current in 1 3 and deciding
+Right to 2 3
+ ----Step---- 1
+#Current in 2 3 and deciding
+Down to 2 2
+ ----Step---- 1
+#Current in 2 2 and deciding
+Right to 3 2
+ ----Step---- 2
+#Current in 3 2 and deciding
+Right to 4 2
+ ----Step---- 2
+#Current in 4 2 and deciding
+Down to 4 1
+ ----Step---- 3
+#Current in 4 1 and deciding
+(4, 0) is a boarder cell
+Down to 4 1
+ ----Step---- 3
+#Current in 4 1 and deciding
+(4, 0) is a boarder cell
+Down to 4 1
+ ----Step---- 4
+#Current in 4 1 and deciding
+Left to 3 1
+ ----Step---- 4
+#Current in 3 1 and deciding
+Left to 2 1
+ ----Step---- 5
+#Current in 2 1 and deciding
+Right to 3 1
+ ----Step---- 5
+#Current in 3 1 and deciding
+Up to 3 2
+ ----Step---- 6
+#Current in 3 2 and deciding
+(3, 3) is an Orc cell
+Up to 3 2
+ ----Step---- 6
+#Current in 3 2 and deciding
+(3, 3) is an Orc cell
+Up to 3 2
+ ----Step---- 7
+#Current in 3 2 and deciding
+Left to 2 2
+ ----Step---- 7
+#Current in 2 2 and deciding
+Up to 2 3
+ ----Step---- 8
+#Current in 2 3 and deciding
+Left to 1 3
+ ----Step---- 8
+#Current in 1 3 and deciding
+Down to 1 2
+ ----Step---- 9
+#Current in 1 2 and deciding
+Down to 1 1
+ ----Step---- 9
+#Current in 1 1 and deciding
+Up to 1 2
+ ----Step---- 10
+ Reached Maximum number of steps
+	########## Random Search iteration #9 ##########	
+
+ ----Step---- 0
+#Current in 2 3 and deciding
+Up to 2 4
+ ----Step---- 0
+#Current in 2 4 and deciding
+Up to 2 5
+ ----Step---- 1
+#Current in 2 5 and deciding
+Left to 1 5
+ ----Step---- 1
+#Current in 1 5 and deciding
+Down to 1 4
+ ----Step---- 2
+#Current in 1 4 and deciding
+Up to 1 5
+ ----Step---- 2
+#Current in 1 5 and deciding
+Right to 2 5
+ ----Step---- 3
+#Current in 2 5 and deciding
+Left to 1 5
+ ----Step---- 3
+#Current in 1 5 and deciding
+(0, 5) is a boarder cell
+Left to 1 5
+ ----Step---- 4
+#Current in 1 5 and deciding
+Right to 2 5
+ ----Step---- 4
+#Current in 2 5 and deciding
+Left to 1 5
+ ----Step---- 5
+#Current in 1 5 and deciding
+(0, 5) is a boarder cell
+Left to 1 5
+ ----Step---- 5
+#Current in 1 5 and deciding
+Right to 2 5
+ ----Step---- 6
+#Current in 2 5 and deciding
+(2, 6) is a boarder cell
+Up to 2 5
+ ----Step---- 6
+#Current in 2 5 and deciding
+Left to 1 5
+ ----Step---- 7
+#Current in 1 5 and deciding
+Down to 1 4
+ ----Step---- 7
+#Current in 1 4 and deciding
+Down to 1 3
+ ----Step---- 8
+#Current in 1 3 and deciding
+Right to 2 3
+ ----Step---- 8
+#Current in 2 3 and deciding
+Left to 1 3
+ ----Step---- 9
+#Current in 1 3 and deciding
+(0, 3) is a boarder cell
+Left to 1 3
+ ----Step---- 9
+#Current in 1 3 and deciding
+(0, 3) is a boarder cell
+Left to 1 3
+ ----Step---- 10
+ Reached Maximum number of steps
+	########## Random Search iteration #10 ##########	
+
+ ----Step---- 0
+#Current in 2 3 and deciding
+Up to 2 4
+ ----Step---- 0
+#Current in 2 4 and deciding
+Down to 2 3
+ ----Step---- 1
+#Current in 2 3 and deciding
+Up to 2 4
+ ----Step---- 1
+#Current in 2 4 and deciding
+Right to 3 4
+ ----Step---- 2
+#Current in 3 4 and deciding
+Up to 3 5
+ ----Step---- 2
+----------Reached!!!----------
+
+ Reached the goal
+ 
+	########## Iterations has been finished ##########	
+
+##########################################################
+	##### Random Search Statistics ##### 
+ 	 4/10 trials successfully reached the target
+##########################################################

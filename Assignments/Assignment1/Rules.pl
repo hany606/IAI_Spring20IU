@@ -280,25 +280,24 @@ changeBallPos(X,Y) :-
     assert(ballPos(X,Y)).
 
 
-randomSearch(_,_,0) :-
-    format('\nReached the last iteration\n')
+randomSearch(_,_,0,P) :-
+    format('\n \n\t########## Iterations has been finished ##########\t\n')
     ,!.
 
-randomSearch(X,Y,N) :-
+randomSearch(X,Y,N,P) :-
     param(M,numEpisodesRS),
-    format(" \n\t########## Random Search iteration #~d ##########\t\n ", [M-N+1]),
-    initsteps,
-    randomSearch(X,Y),
+    format('\n\t########## Random Search iteration #~d ##########\t\n', [M-N+1]),
+    randomSearch(X,Y,[]),
     succ(Nnew, N),
-    randomSearch(X,Y,Nnew).
+    randomSearch(X,Y,Nnew,[]).
 
 % Ranges are made as the step is 1/12 ~= 0.0833 and the random variable is from std normal distribution ~ [0,1]
 % Generation of the ranges was pretty made easily using python :)
-randomSearch(X,Y) :-
+randomSearch(X,Y,P) :-
 (
-    asserta(visited(X,Y)),
     param(MRS,maxStepsRS),
-    stepscounter(N),
+    lengthlst(P,Nn),
+    N is (div(Nn,4)),
     format('\n ----Step---- ~d', [N]),
     (reached(X,Y); MRS == N)-> 
     (
@@ -315,32 +314,31 @@ randomSearch(X,Y) :-
     (
         random(R),
         format('\n#Current in ~d ~d and deciding', [X,Y]),
-        incrsteps,
         (
             % (R >= 0, R < 0.083) ->
             (R >= 0, R < 0.25) ->
             (
-                nextUp(X,Y,Xnew,Ynew,_),
+                nextUp(X,Y,Xnew,Ynew,_,[]),     % We don't want to check if it was visited before or not as it is random search
                 format('\nUp to ~d ~d', [Xnew, Ynew])
             );  
             % (R >= 0.083, R < 0.1666) ->
             (R >= 0.25, R < 0.5) ->
             (
-                nextDown(X,Y,Xnew,Ynew,_),
+                nextDown(X,Y,Xnew,Ynew,_,[]),
                 format('\nDown to ~d ~d', [Xnew, Ynew])
 
             );
             % (R >= 0.1666, R < 0.2499) ->
             (R >= 0.50, R < 0.75) ->
             (
-                nextRight(X,Y,Xnew,Ynew,_),
+                nextRight(X,Y,Xnew,Ynew,_,[]),
                 format('\nRight to ~d ~d', [Xnew, Ynew])
             );
             %0.3332
             % (R >= 0.2499, R =< 1) -> 
             (R >= 0.75, R =< 1) -> 
             (
-                nextLeft(X,Y,Xnew,Ynew,_),
+                nextLeft(X,Y,Xnew,Ynew,_,[]),
                 format('\nLeft to ~d ~d', [Xnew, Ynew])
             )%;
             % (R >= 0.3332, R < 0.4165) ->
@@ -360,8 +358,7 @@ randomSearch(X,Y) :-
             % (R >= 0.9163, R =< 1) ->
             % (pass(X,Y)),
         ),
-        randomSearch(Xnew,Ynew),
-        retract(visited(Xnew,Ynew))
+        randomSearch(Xnew,Ynew,[Xnew,Ynew|P])
     )
 ).
 
@@ -392,19 +389,26 @@ initMain :-
     initrscounter.
 
 
-main :-
+mainBacktrack :-
     initMain
     ,s(Xs,Ys)
     ,Ns is 0
     ,backtrackSearch(Xs,Ys,[])
     ,format('\n--------------------------------------------------------------\n--------------------------------------------------------------\n--------------------------------------------------------------\n')
-    % param(NRS_episodes, numEpisodesRS)
-    % ,randomSearch(Xs,Ys,NRS_episodes)
-    % ,rsStatistics
-    % ,aStarSearch(Xs,Ys)
-    % ,hillClimberSearch(Xs,Ys)
-    % ,qTableRL(Xs,Ys)
-    .
+    ,format('\n\tCurrent Optimal Paths\t\n')
+    ,optimalPath(P)
+    ,writeln(P)
+    ,format('\n--------------------------------------------------------------\n--------------------------------------------------------------\n--------------------------------------------------------------\n')
+    . 
+
+mainRandomSearch :-
+    initMain
+    ,s(Xs,Ys)
+    ,Ns is 0,
+    param(NRS_episodes, numEpisodesRS),
+    randomSearch(Xs,Ys,NRS_episodes, []),
+    rsStatistics.  
+
 
 % empty (X,Y):-
 %     \+ o(X,Y),
