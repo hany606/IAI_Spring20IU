@@ -13,8 +13,12 @@
 
 /*
     Assumptions:
+        - BT => Backtrack, RS => Random Search, HC => HillClimber, AS => A*, QT => Q-Table.
         - Walls surrounded the playground, from each side there is a wall (Extra row/column).
         - Steps in RS are considered with passing and movements.
+        - There is another file called counters.pl that is used to modularity of the code to write there only the counters rules
+            These counters is used for counting number of steps, counting number of trials for RS.
+            To ease for generation of the counters for me instead of copying and past, there has been mad a python script to generate it.
 */
 
 param(5,mapSize).
@@ -26,28 +30,12 @@ param(10, numEpisodesRS).
 :- dynamic mapHumans/2.
 :- dynamic mapTouchDown/2.
 :- dynamic mapStart/2.
+
 :- dynamic ballPos/2.
 :- dynamic visited/2.
 :- dynamic path/2.
 :- dynamic optimalPathCount/2.
 
-:- dynamic stepscounter/1.
-
-initsteps :-
-    retractall(stepscounter(_)),
-    assertz(stepscounter(0)).
-
-incrsteps :-
-    stepscounter(V),
-    retractall(stepscounter(_)),
-    succ(V, V1),
-    assertz(stepscounter(V1)).
-
-decrsteps :-
-    stepscounter(V),
-    retractall(stepscounter(_)),
-    succ(V0, V),
-    assertz(stepscounter(V0)).
 
 
 ballPos(0,0).
@@ -107,23 +95,25 @@ restartMap :-
 %     X > 0, X =< Z,
 %     Y > 0, Y =< Z.
     
-% It is made here to add 1,2,4 as binary bits to indicate exactly which combination of problem in validation
 valid(X,Y,V) :-
-(   V is 0,
+(
+    (mapBoarders(X,Y)) ->
     (
-        (mapBoarders(X,Y) == true) ->
-        (
-            V is V +1
-        );
-        (mapOrcs(X,Y) == true) ->
-        (
-            V is V +2
-        );
-        (visited(X,Y) == true) ->
-        (
-            V is V +4
-        )
-    )
+        succ(0,V),
+        format('\nIt is a boarder cell')
+    );
+    (mapOrcs(X,Y)) ->
+    (
+        succ(1,V),
+        format('\nIt is an Orc cell')
+    );
+    (visited(X,Y)) ->
+    (
+        succ(2,V),
+        format('\nIt is a visited cell')
+    );
+    succ(V,1)
+    
 ).
 
 reached(X,Y) :-
@@ -286,7 +276,7 @@ changeBallPos(X,Y) :-
 
 
 randomSearch(_,_,0) :-
-    format("\nReached the last iteration\n")
+    format('\nReached the last iteration\n')
     ,!.
 
 randomSearch(X,Y,N) :-
@@ -307,7 +297,14 @@ randomSearch(X,Y) :-
     format('\n ----Step---- ~d', [N]),
     (reached(X,Y); MRS == N)-> 
     (
-        write("\nReached RS or maximum number of steps")
+        (MRS == N)->
+        (
+            format('\n Reached Maximum number of steps')    
+        );
+        (
+            incrrscounter,
+            format('\n Reached the goal')    
+        )
     ); 
     not(reached(X,Y)) ->  
     (
@@ -315,24 +312,28 @@ randomSearch(X,Y) :-
         format('\n#Current in ~d ~d and deciding', [X,Y]),
         incrsteps,
         (
-            (R >= 0, R < 0.083) ->
+            % (R >= 0, R < 0.083) ->
+            (R >= 0, R < 0.25) ->
             (
                 nextUp(X,Y,Xnew,Ynew,_),
                 format('\nUp to ~d ~d', [Xnew, Ynew])
             );  
-            (R >= 0.083, R < 0.1666) ->
+            % (R >= 0.083, R < 0.1666) ->
+            (R >= 0.25, R < 0.5) ->
             (
                 nextDown(X,Y,Xnew,Ynew,_),
                 format('\nDown to ~d ~d', [Xnew, Ynew])
 
             );
-            (R >= 0.1666, R < 0.2499) ->
+            % (R >= 0.1666, R < 0.2499) ->
+            (R >= 0.50, R < 0.75) ->
             (
                 nextRight(X,Y,Xnew,Ynew,_),
                 format('\nRight to ~d ~d', [Xnew, Ynew])
             );
             %0.3332
-            (R >= 0.2499, R =< 1) -> 
+            % (R >= 0.2499, R =< 1) -> 
+            (R >= 0.75, R =< 1) -> 
             (
                 nextLeft(X,Y,Xnew,Ynew,_),
                 format('\nLeft to ~d ~d', [Xnew, Ynew])
@@ -371,15 +372,28 @@ qTableRL(X,Y) :-
 pass(X,Y) :-
     true.
 
-main :-
+
+rsStatistics :-
+    rscounter(N),
+    param(Nall, numEpisodesRS),
+    format('\n##########################################################\n\t##### Random Search Statistics ##### \n \t ~d/~d trials successfully reached the target\n##########################################################', [N,Nall]).
+
+initMain :-
     consult("input.pl"),
-    s(Xs,Ys),
+    consult("counters.pl"),
     resetMap,
     initMap,
+    initrscounter.
+
+
+main :-
+    initMain,
+    s(Xs,Ys),
     Ns is 0,
     % backtrackSearch(Xs,Ys),
     param(NRS_episodes, numEpisodesRS),
     randomSearch(Xs,Ys,NRS_episodes),
+    rsStatistics,
     aStarSearch(Xs,Ys),
     hillClimberSearch(Xs,Ys),
     qTableRL(Xs,Ys).
