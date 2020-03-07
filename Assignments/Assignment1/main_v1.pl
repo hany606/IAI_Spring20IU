@@ -43,8 +43,8 @@ param(1, numStepsAhead).
 :- dynamic optimalPathCount/2.
 % --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 % X,Y,Val
-:- dynamic aStarOpenList/5.
-:- dynamic aStarClosedList/5.
+:- dynamic aStarOpenList/3.
+:- dynamic aStarClosedList/3.
 
 
 :- dynamic minOpenList/1.
@@ -378,12 +378,12 @@ addNeighbourhood(X,Y,N,P) :-
                 (
                     % bagof(GC,aStarOpenList(X,Y,GC),List),
                     % min(List,Gcost_old),
-                    aStarClosedList(X,Y,Gcost_old,_,_),
-                    not(aStarClosedList(Xu,Yu,_,_,_)) ->
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xu,Yu,_)) ->
                     (
                         Gcost_new is Gcost_old +1,
                         format(" with cost ~d",[Gcost_new]),
-                        asserta(aStarOpenList(Xu,Yu,Gcost_new,X,Y)) 
+                        asserta(aStarOpenList(Xu,Yu,Gcost_new)) 
                     )
                 );
                 % There is no human and valid then it is an empty cell, then it is move, cost 2
@@ -391,13 +391,13 @@ addNeighbourhood(X,Y,N,P) :-
                 (
                     % bagof(GC,aStarOpenList(X,Y,GC),List),
                     % min(List,Gcost_old),
-                    aStarClosedList(X,Y,Gcost_old,_,_),
-                    not(aStarClosedList(Xu,Yu,_,_,_)) ->
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xu,Yu,_)) ->
                     (
                         Gcost_new is Gcost_old +2,
                         
                         format(" with cost ~d",[Gcost_new]),
-                        asserta(aStarOpenList(Xu,Yu,Gcost_new,X,Y))
+                        asserta(aStarOpenList(Xu,Yu,Gcost_new))
                     )
                 )
                 % It is possible to make long pass, then its cost = 1
@@ -410,13 +410,13 @@ addNeighbourhood(X,Y,N,P) :-
                 (
                     % bagof(GC,aStarOpenList(X,Y,GC),List),
                     % min(List,Gcost_old),
-                    aStarClosedList(X,Y,Gcost_old,_,_),
-                    not(aStarClosedList(Xu,Yu,_, _, _)) ->
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xu,Yu,_)) ->
                     (
                         Gcost_new is Gcost_old - 1,
                         
                         format(" with cost ~d",[Gcost_new]),
-                        asserta(aStarOpenList(Xu,Yu,Gcost_new,X,Y))
+                        asserta(aStarOpenList(Xu,Yu,Gcost_new))
                     )
                 )
                 
@@ -437,26 +437,26 @@ addNeighbourhood(X,Y,N,P) :-
                 (
                     % bagof(GC,aStarOpenList(X,Y,GC),List),
                     % min(List,Gcost_old),
-                    aStarClosedList(X,Y,Gcost_old,_,_),
-                    not(aStarClosedList(Xd,Yd,_,_,_)) ->
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xd,Yd,_)) ->
                     (
                         Gcost_new is Gcost_old +1,
                         
                         format(" with cost ~d",[Gcost_new]),
-                        asserta(aStarOpenList(Xd,Yd,Gcost_new,X,Y))
+                        asserta(aStarOpenList(Xd,Yd,Gcost_new))
                     )
                 );
                 (not(h(Xd,Yd))) ->
                 (
                     % bagof(GC,aStarOpenList(X,Y,GC),List),
                     % min(List,Gcost_old),
-                    aStarClosedList(X,Y,Gcost_old,_,_),
-                    not(aStarClosedList(Xd,Yd,_,_,_)) ->
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xd,Yd,_)) ->
                     (
                         Gcost_new is Gcost_old +2,
                         
                         format(" with cost ~d",[Gcost_new]),
-                        asserta(aStarOpenList(Xd,Yd,Gcost_new,X,Y))
+                        asserta(aStarOpenList(Xd,Yd,Gcost_new))
                     )
                 )
                 % long_pass
@@ -465,13 +465,13 @@ addNeighbourhood(X,Y,N,P) :-
                 (
                     % bagof(GC,aStarOpenList(X,Y,GC),List),
                     % min(List,Gcost_old),
-                    aStarClosedList(X,Y,Gcost_old,_,_),
-                    not(aStarClosedList(Xd,Yd,_,_,_)) ->
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xd,Yd,_)) ->
                     (
                         Gcost_new is Gcost_old - 1,
                         
                         format(" with cost ~d",[Gcost_new]),
-                        asserta(aStarOpenList(Xd,Yd,Gcost_new,X,Y))   
+                        asserta(aStarOpenList(Xd,Yd,Gcost_new))   
                     )
                 )
                 
@@ -493,26 +493,26 @@ addNeighbourhood(X,Y,N,P) :-
                 (   
                     % bagof(GC,aStarOpenList(X,Y,GC),List),
                     % min(List,Gcost_old),
-                    aStarClosedList(X,Y,Gcost_old,_,_),
-                    not(aStarClosedList(Xr,Yr,_,_,_)) ->
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xr,Yr,_)) ->
                     (
                         Gcost_new is Gcost_old +1,
                         
                         format(" with cost ~d",[Gcost_new]),
-                        asserta(aStarOpenList(Xr,Yr,Gcost_new,X,Y)) 
+                        asserta(aStarOpenList(Xr,Yr,Gcost_new)) 
                     )
                 );
                 (not(h(Xr,Yr))) ->
                 (
                     % bagof(GC,aStarOpenList(X,Y,GC),List),
                     % min(List,Gcost_old),
-                    aStarClosedList(X,Y,Gcost_old,_,_),
-                    not(aStarClosedList(Xr,Yr,_,_,_)) ->
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xr,Yr,_)) ->
                     (
                         Gcost_new is Gcost_old +2,
                         
                         format(" with cost ~d",[Gcost_new]),
-                        asserta(aStarOpenList(Xr,Yr,Gcost_new,X,Y))
+                        asserta(aStarOpenList(Xr,Yr,Gcost_new))
                     )
                 )
                 % long_pass
@@ -521,13 +521,13 @@ addNeighbourhood(X,Y,N,P) :-
                 (
                     % bagof(GC,aStarOpenList(X,Y,GC),List),
                     % min(List,Gcost_old),
-                    aStarClosedList(X,Y,Gcost_old,_,_),
-                    not(aStarClosedList(Xr,Yr,_,_,_)) ->
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xr,Yr,_)) ->
                     (
                         Gcost_new is Gcost_old - 1,
                         
                         format(" with cost ~d",[Gcost_new]),
-                        asserta(aStarOpenList(Xr,Yr,Gcost_new,X,Y))
+                        asserta(aStarOpenList(Xr,Yr,Gcost_new))
                     )
                 )
             ),
@@ -548,24 +548,24 @@ addNeighbourhood(X,Y,N,P) :-
                 (
                     % bagof(GC,aStarOpenList(X,Y,GC),List),
                     % min(List,Gcost_old),
-                    aStarClosedList(X,Y,Gcost_old,_,_),
-                    not(aStarClosedList(Xl,Yl,_,_,_)) ->
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xl,Yl,_)) ->
                     (
                         Gcost_new is Gcost_old +1,
                         format(" with cost ~d",[Gcost_new]),
-                        asserta(aStarOpenList(Xl,Yl,Gcost_new,X,Y))
+                        asserta(aStarOpenList(Xl,Yl,Gcost_new))
                     )
                 );
                 (not(h(Xl,Yl))) ->
                 (
                     % bagof(GC,aStarOpenList(X,Y,GC),List),
                     % min(List,Gcost_old),
-                    aStarClosedList(X,Y,Gcost_old,_,_),
-                    not(aStarClosedList(Xl,Yl,_,_,_)) ->
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xl,Yl,_)) ->
                     (
                         Gcost_new is Gcost_old +2,
                         format(" with cost ~d",[Gcost_new]),
-                        asserta(aStarOpenList(Xl,Yl,Gcost_new,X,Y))
+                        asserta(aStarOpenList(Xl,Yl,Gcost_new))
                     )
                 )
                 % long_pass
@@ -574,12 +574,12 @@ addNeighbourhood(X,Y,N,P) :-
                 (
                     % bagof(GC,aStarOpenList(X,Y,GC),List),
                     % min(List,Gcost_old),
-                    aStarClosedList(X,Y,Gcost_old,_,_),
-                    not(aStarClosedList(Xl,Yl,_,_,_)) ->
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xl,Yl,_)) ->
                     (
                         Gcost_new is Gcost_old - 1,
                         format(" with cost ~d",[Gcost_new]),
-                        asserta(aStarOpenList(Xl,Yl,Gcost_new,X,Y))   
+                        asserta(aStarOpenList(Xl,Yl,Gcost_new))   
                     )
                 )
             ),
@@ -594,17 +594,17 @@ addNeighbourhood(X,Y,N,P) :-
 ). 
 
 % Source: https://stackoverflow.com/questions/36411848/how-to-use-tranpose-and-findall-to-print-all-the-variables-in-a-predicate
-getOpenList(List) :- findall([X,Y,V,Xp,Yp], aStarOpenList(X,Y,V,Xp,Yp), List).
+getOpenList(List) :- findall([X,Y,V], aStarOpenList(X,Y,V), List).
 printOpenList([]) :- !.
-printOpenList([[X,Y,V,Xp,Yp]|T]) :- format('\n! X: ~d,Y: ~d,V: ~d   , Xp: ~d, Yp:~d', [X,Y,V,Xp,Yp]),printOpenList(T).
+printOpenList([[X,Y,V]|T]) :- format('\n! X: ~d,Y: ~d,V: ~d', [X,Y,V]),printOpenList(T).
 
-getClosedList(List) :- findall([X,Y,V,Xp,Yp], aStarClosedList(X,Y,V,Xp,Yp), List).
+getClosedList(List) :- findall([X,Y,V], aStarClosedList(X,Y,V), List).
 printClosedList([]) :- !.
-printClosedList([[X,Y,V,Xp,Yp]|T]) :- format('\n! X: ~d,Y: ~d,V: ~d    , Xp: ~d, Yp:~d', [X,Y,V,Xp,Yp]),printClosedList(T).
+printClosedList([[X,Y,V]|T]) :- format('\n! X: ~d,Y: ~d,V: ~d', [X,Y,V]),printClosedList(T).
 
 
 newList([]) :- !.
-newList([[X,Y,V,Xp,Yp]|T]) :- 
+newList([[X,Y,V]|T]) :- 
     minOpenList(VV),
     (V < VV) -> 
     (
@@ -631,28 +631,22 @@ selectMinNode(Xn,Yn) :-
     newList(List),
     minOpenList(C),
     format('\n final minimum cost ~d', C),
-    aStarOpenList(Xn,Yn,C,_,_),
+    aStarOpenList(Xn,Yn,C),
     inPath(Xn,Yn,P,R).
 
+% getPath([], _) :- !.
 
+% getPath(P,Pp) :-
+%     Pp is P.
 
-getPath(_,2,3) :- !.
-
-getPath(P,X,Y) :-
-    aStarClosedList(X,Y,_,Xp,Yp),
-    format(' (~d,~d)', [Xp,Yp]),
-    mapStart(Xs,Ys),
-    not((X == Xs, Y == Ys)) ->
-        getPath([X,Y|P],Xp,Yp),
-    true.
 
 
 
 aStarSearch(X,Y,NStepsAhead,P) :-
-    aStarOpenList(X,Y,V,Xp,Yp), 
-    retractall(aStarOpenList(X,Y,_,_,_)),
-    asserta(aStarClosedList(X,Y,V,Xp,Yp)),
-    format('\nCurrent in (~d,~d) from (~d,~d)', [X,Y,Xp,Yp]),
+    aStarOpenList(X,Y,V), 
+    retractall(aStarOpenList(X,Y,_)),
+    asserta(aStarClosedList(X,Y,V)),
+    format('\nCurrent in (~d,~d)', [X,Y]),
     
     getOpenList(OList),
     format('\n -------------------------- Open List ---------------------------\n'),
@@ -663,23 +657,19 @@ aStarSearch(X,Y,NStepsAhead,P) :-
     printClosedList(CList),
     format('\n -----------------------------------------------------\n'),
 
-    mapTouchDown(Xt,Yt), 
-    (reached(X,Y); aStarOpenList(Xt,Yt,Vt,_,_)) -> 
+    t(Xt,Yt), 
+    (reached(X,Y); aStarOpenList(Xt,Yt,Vt)) -> 
     (
-        retractall(aStarOpenList(Xt,Yt,_,_,_)),
-        asserta(aStarClosedList(Xt,Yt,Vt,X,Y)),
+        retractall(aStarOpenList(Xt,Yt,_)),
+        asserta(aClosedList(Xt,Yt,Vt)),
         Pp = [Xt,Yt|P],
-        format('\n ---------- Nodes that has been visited -----------\n'),
-        printlst(Pp),
-        format('\n ----------- Shortest Path ------------\n'),
-        format(' (~d,~d)', [Xt,Yt]),
-        getPath(P,Xt,Yt),
-        format('\n----------------------------\n'),
-        true
+        % getPath(P,Pp),
+        printlst(Pp),true
     );
     addNeighbourhood(X,Y,0,[X,Y|P]);
     selectMinNode(Xnew, Ynew),
     format('\n\n------------------ Selected (~d,~d) -------------------------\n\n', [Xnew, Ynew]),
+    aStarOpenList(Xw,Yw,Vw),
     aStarSearch(Xnew,Ynew, NStepsAhead, [X,Y|P]).
 
 
@@ -719,6 +709,6 @@ mainAStartSearch :-
     ,s(Xs,Ys)
     ,param(S_ahead, numStepsAhead)
     ,param(N,mapSize)
-    ,asserta(aStarOpenList(2,3,0,2,3))
+    ,asserta(aStarOpenList(2,3,0))
     ,aStarSearch(Xs,Ys,S_ahead, [])
     .  
