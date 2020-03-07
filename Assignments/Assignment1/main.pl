@@ -22,26 +22,32 @@
             These counters is used for counting number of steps, counting number of trials for RS.
             To ease for generation of the counters for me instead of copying and past, there has been mad a python script to generate it.
 */
-
+% --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 param(5,mapSize).
 param(10,maxStepsRS).
 param(10, numEpisodesRS).
-
+param(1, numStepsAhead).
+% --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 :- dynamic mapBoarders/2.
 :- dynamic mapOrcs/2.
 :- dynamic mapHumans/2.
 :- dynamic mapTouchDown/2.
 :- dynamic mapStart/2.
-
-:- dynamic ballPos/2.
-:- dynamic visited/2.
+% --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 :- dynamic optimalPath/1.
 :- dynamic optimalPathCount/2.
+% --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+% X,Y,Val
+:- dynamic aStarOpenList/3.
+:- dynamic aStarClosedList/3.
+
+% --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+% Source: https://stackoverflow.com/questions/3965054/prolog-find-minimum-in-a-list/8414574#8414574
+:- [library(aggregate)].
+min(L,M) :- order_by([asc(M)], member(M,L)), !.
 
 
-
-ballPos(0,0).
-
+% --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 resetMap :-
     retractall(mapBoarders(_,_)),
@@ -80,8 +86,6 @@ initMap :-
     asserta(mapTouchDown(Xt,Yt)),
     s(Xs,Ys),
     asserta(mapStart(Xs,Ys)),
-    changeBallPos(Xs,Ys),
-    asserta(visited(Xs,Ys)),
     PathLimitCount is Z*Z,
     asserta(optimalPathCount(PathLimitCount,0)),
     retractall(optimalPath(_)),
@@ -92,12 +96,7 @@ restartMap :-
     initMap.
 
 
-
-% valid(X,Y) :-
-%     param(Z,mapSize),
-%     X > 0, X =< Z,
-%     Y > 0, Y =< Z.
-    
+% --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 inPath(X,Y,P,R) :-
     count(P,X,Y,C),
     (C =< 1) -> R is 0;     % as the visited cell is in the path is two times in the path at most (in, out)
@@ -127,74 +126,10 @@ valid(X,Y,V,P) :-
 
 reached(X,Y) :-
     mapTouchDown(X,Y),
-    % visited(Xv,Yv),       % developed old and efficient way to track the path
-    % asserta(path(Xv,Yv)),
     write('\n----------Reached!!!----------\n').
 
 
-% This only will make it search once
-% backtrackSearch(X,Y) :-
-%     asserta(visited(X,Y)),
-%     reached(X,Y);
-%     move(X,Y),
-%     pass(X,Y).
-
-
-% Save the path
-saveOptimalPath(X,Y,P,N) :-
-    format('\nGreat !!! ~d ~d in ~d steps', [X,Y,N]),
-    format('\nPrinting all the path in a reverse order from the end to the start\n'),
-    printlst(P),
-    format('\n----------Reached!!!----------\n'),
-    optimalPathCount(Best,C),
-    retractall(optimalPathCount(_,_)),
-    (
-        (N < Best) -> 
-        (
-            retractall(optimalPath(_)),
-            assertz(optimalPath(P)),
-            assertz(optimalPathCount(N,0)),
-            format("\n Great! New optimal path with less path cost : ~d with muliplicity ~d", [N, 0])
-        ); 
-        (N == Best) -> (
-            assertz(optimalPath(P)),
-            succ(C, Cnew), 
-            assertz(optimalPathCount(N,Cnew)),
-            format("\n Great! New optimal path count with the same old cost: ~d with muliplicity ~d", [N, Cnew])
-        )
-    )
-    ,optimalPathCount(Nnew,Cm).
-
-
-
-% This to limit the backtrack to the best result we have till now or not
-isOptimalPath(N) :-
-    optimalPathCount(Best,_),
-    format('\n Steps for now ~d, optimal path count: ~d', [N, Best]),
-    not(N > Best).
-    % true.
-
-
-
-backtrackSearch(X,Y,P) :-
-(
-    lengthlst(P,Nn),
-    N is (div(Nn,4)),
-    (
-        reached(X,Y) -> 
-        (
-            saveOptimalPath(X,Y,P,N)
-        ); 
-        (
-            not(isOptimalPath(N)) -> (
-                format('\n \t XXXXXXXXXX Not optimal path, discarded XXXXXXXXXX \n Reason: Number of current steps: ~d',[N])
-            );
-            (move(X,Y,[X,Y|P],N), pass(X,Y))
-        )
-    )    
-).
-
-
+% --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 move(X,Y,P,N) :-
 (
     format('\n ----Step---- ~d', [N]),
@@ -268,6 +203,10 @@ nextLeft(X,Y,Xl,Yl,V,P) :-
     )
 ).
 
+
+pass(X,Y) :-
+    true.
+
 % passU(X,Y,Xu,Yu) :-
     % validation,
     % pass to the human on that line,
@@ -275,10 +214,61 @@ nextLeft(X,Y,Xl,Yl,V,P) :-
 
 
 
-changeBallPos(X,Y) :-
-    retractall(ballPos(_,_)),
-    assert(ballPos(X,Y)).
+% --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+% Save the path
+saveOptimalPath(X,Y,P,N) :-
+    format('\nGreat !!! ~d ~d in ~d steps', [X,Y,N]),
+    format('\nPrinting all the path in a reverse order from the end to the start\n'),
+    printlst(P),
+    format('\n----------Reached!!!----------\n'),
+    optimalPathCount(Best,C),
+    retractall(optimalPathCount(_,_)),
+    (
+        (N < Best) -> 
+        (
+            retractall(optimalPath(_)),
+            assertz(optimalPath(P)),
+            assertz(optimalPathCount(N,0)),
+            format("\n Great! New optimal path with less path cost : ~d with muliplicity ~d", [N, 0])
+        ); 
+        (N == Best) -> (
+            assertz(optimalPath(P)),
+            succ(C, Cnew), 
+            assertz(optimalPathCount(N,Cnew)),
+            format("\n Great! New optimal path count with the same old cost: ~d with muliplicity ~d", [N, Cnew])
+        )
+    )
+    ,optimalPathCount(Nnew,Cm).
+
+
+
+% This to limit the backtrack to the best result we have till now or not
+isOptimalPath(N) :-
+    optimalPathCount(Best,_),
+    format('\n Steps for now ~d, optimal path count: ~d', [N, Best]),
+    not(N > Best).
+
+
+backtrackSearch(X,Y,P) :-
+(
+    lengthlst(P,Nn),
+    N is (div(Nn,4)),
+    (
+        reached(X,Y) -> 
+        (
+            saveOptimalPath(X,Y,P,N)
+        ); 
+        (
+            not(isOptimalPath(N)) -> (
+                format('\n \t XXXXXXXXXX Not optimal path, discarded XXXXXXXXXX \n Reason: Number of current steps: ~d',[N])
+            );
+            (move(X,Y,[X,Y|P],N), pass(X,Y))
+        )
+    )    
+).
+
+% --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 randomSearch(_,_,0,P) :-
     format('\n \n\t########## Iterations has been finished ##########\t\n')
@@ -362,23 +352,236 @@ randomSearch(X,Y,P) :-
     )
 ).
 
-aStarSearch(X,Y) :-
-    true.
-
-hillClimberSearch(X,Y) :-
-    true.
-
-qTableRL(X,Y) :-
-    true.
-
-pass(X,Y) :-
-    true.
-
 
 rsStatistics :-
     rscounter(N),
     param(Nall, numEpisodesRS),
     format('\n##########################################################\n\t##### Random Search Statistics ##### \n \t ~d/~d trials successfully reached the target\n##########################################################', [N,Nall]).
+
+
+% --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+addNeighbourhood(X,Y,N,P) :-
+(
+    (
+        nextUp(X,Y,Xu,Yu,Vu,P),
+        ((Vu == 1) ->
+            format('\nAdd Up to ~d ~d in Open List', [Xu, Yu]),
+            (
+                
+                % There is a human, then it is a handover with cost 1
+                h(Xu,Yu) ->
+                (
+                    bagof(GC,aStarOpenList(X,Y,GC),List),
+                    min(List,Gcost_old),
+                    (
+                        Gcost_new is Gcost_old +1,
+                        
+                        asserta(aStarOpenList(Xu,Yu,Gcost_new)) 
+                    )
+                );
+                % There is no human and valid then it is an empty cell, then it is move, cost 2
+                (not(h(Xu,Yu))) ->
+                (
+                    bagof(GC,aStarOpenList(X,Y,GC),List),
+                    min(List,Gcost_old),
+
+                    (
+                        Gcost_new is Gcost_old +2,
+                        
+                        asserta(aStarOpenList(Xu,Yu,Gcost_new))
+                    )
+                )
+                % It is possible to make long pass, then its cost = 1
+                % long_pass
+                % ();
+                ;
+                % It is Touchdown -> then there is heuristic cost with negative value of Euclidian distance to work as lower bound for the cost which will enable us to get an optimal solution
+                % , otherwise the heuristic cost is zero as in the above predicates
+                (t(Xu,Yu)) ->
+                (
+                    bagof(GC,aStarOpenList(X,Y,GC),List),
+                    min(List,Gcost_old),
+
+                    (
+                        Gcost_new is Gcost_old - 1,
+                        
+                        asserta(aStarOpenList(Xu,Yu,Gcost_new))
+                    )
+                )
+                
+            ),
+            param(NStepsAhead, numStepsAhead),
+            succ(N,Nnew),
+            (Nnew < NStepsAhead) ->
+            (
+                addNeighbourhood(Xu,Yu,Nnew,[Xu,Yu|P])
+            )
+        );
+        nextDown(X,Y,Xd,Yd,Vd,P),
+        ((Vd == 1) ->
+            format('\nAdd down to ~d ~d in Open List', [Xd, Yd]),
+            (
+                % There is a human, then it is a handover with cost 1
+                h(Xd,Yd) ->
+                (
+                    bagof(GC,aStarOpenList(X,Y,GC),List),
+                    min(List,Gcost_old),
+
+                    (
+                        Gcost_new is Gcost_old +1,
+                        
+                        asserta(aStarOpenList(Xd,Yd,Gcost_new))
+                    )
+                );
+                (not(h(Xd,Yd))) ->
+                (
+                    bagof(GC,aStarOpenList(X,Y,GC),List),
+                    min(List,Gcost_old),
+
+                    (
+                        Gcost_new is Gcost_old +2,
+                        
+                        asserta(aStarOpenList(Xd,Yd,Gcost_new))
+                    )
+                )
+                % long_pass
+                ;
+                (t(Xd,Yd)) ->
+                (
+                    bagof(GC,aStarOpenList(X,Y,GC),List),
+                    min(List,Gcost_old),
+
+                    (
+                        Gcost_new is Gcost_old - 1,
+                        
+                        asserta(aStarOpenList(Xd,Yd,Gcost_new))   
+                    )
+                )
+                
+            ),
+            param(NStepsAhead, numStepsAhead),
+            succ(N,Nnew),
+            (Nnew < NStepsAhead) ->
+            (
+                addNeighbourhood(Xd,Yd,Nnew,[Xd,Yd|P])
+            )
+        );
+        nextRight(X,Y,Xr,Yr,Vr,P),
+        ((Vr == 1) ->
+            format('\nAdd Right to ~d ~d in Open List', [Xr, Yr]),
+            (
+                
+                % There is a human, then it is a handover with cost 1
+                h(Xr,Yr) ->
+                (   
+                    bagof(GC,aStarOpenList(X,Y,GC),List),
+                    min(List,Gcost_old),
+
+                    (
+                        Gcost_new is Gcost_old +1,
+                        
+                        asserta(aStarOpenList(Xr,Yr,Gcost_new)) 
+                    )
+                );
+                (not(h(Xr,Yr))) ->
+                (
+                    bagof(GC,aStarOpenList(X,Y,GC),List),
+                    min(List,Gcost_old),
+
+                    (
+                        Gcost_new is Gcost_old +1,
+                        
+                        asserta(aStarOpenList(Xr,Yr,Gcost_new))
+                    )
+                )
+                % long_pass
+                ;
+                (t(Xr,Yr)) ->
+                (
+                    bagof(GC,aStarOpenList(X,Y,GC),List),
+                    min(List,Gcost_old),
+
+                    (
+                        Gcost_new is Gcost_old - 1,
+                        
+                        asserta(aStarOpenList(Xr,Yr,Gcost_new))
+                    )
+                )
+            ),
+            param(NStepsAhead, numStepsAhead),
+            succ(N,Nnew),
+            (Nnew < NStepsAhead) ->
+            (
+                addNeighbourhood(Xr,Yr,Nnew,[Xr,Yr|P])
+            )
+        );
+        nextLeft(X,Y,Xl,Yl,Vl,P),
+        ((Vl == 1) ->
+            format('\nAdd Left to ~d ~d in Open List', [Xl, Yl]),
+            (
+                
+                % There is a human, then it is a handover with cost 1
+                h(Xl,Yl) ->
+                (
+                    bagof(GC,aStarOpenList(X,Y,GC),List),
+                    min(List,Gcost_old),
+
+                    (
+                        Gcost_new is Gcost_old +1,
+                        asserta(aStarOpenList(Xl,Yl,Gcost_new))
+                    )
+                );
+                (not(h(Xl,Yl))) ->
+                (
+                    bagof(GC,aStarOpenList(X,Y,GC),List),
+                    min(List,Gcost_old),
+
+                    (
+                        Gcost_new is Gcost_old +2,
+                        assertz(aStarOpenList(Xl,Yl,Gcost_new))
+                    )
+                )
+                % long_pass
+                ;
+                (t(Xl,Yl)) ->
+                (
+                    bagof(GC,aStarOpenList(X,Y,GC),List),
+                    min(List,Gcost_old),
+                    (
+                        Gcost_new is Gcost_old - 1,
+                        asserta(aStarOpenList(Xl,Yl,Gcost_new))   
+                    )
+                )
+            ),
+            param(NStepsAhead, numStepsAhead),
+            succ(N,Nnew),
+            (Nnew < NStepsAhead) ->
+            (
+                addNeighbourhood(Xl,Yl,Nnew,[Xl,Yl|P])
+            )
+        )
+    )
+). 
+
+% addNeighbourhoods
+
+initTest :-
+    initMain,
+    asserta(aStarOpenList(2,3,0)).
+test :-
+    addNeighbourhood(2,3,0,[2,3|P]).
+
+aStarSearch(X,Y,NStepsAhead,P) :- 
+    addNeighbourhood(X,Y,0,[X,Y|P]),
+    selectMinNode(X,Y, Xnew, Ynew),
+    aStarSearch(Xnew,Ynew, NStepsAhead, [X,Y|P]),
+    true.
+
+
+qTableRL(X,Y) :-
+    true.
+
+
 
 initMain :-
     consult("input.pl"),
@@ -392,7 +595,6 @@ initMain :-
 mainBacktrack :-
     initMain
     ,s(Xs,Ys)
-    ,Ns is 0
     ,backtrackSearch(Xs,Ys,[])
     ,format('\n--------------------------------------------------------------\n--------------------------------------------------------------\n--------------------------------------------------------------\n')
     ,format('\n\tCurrent Optimal Paths\t\n')
@@ -404,12 +606,18 @@ mainBacktrack :-
 mainRandomSearch :-
     initMain
     ,s(Xs,Ys)
-    ,Ns is 0,
-    param(NRS_episodes, numEpisodesRS),
-    randomSearch(Xs,Ys,NRS_episodes, []),
-    rsStatistics.  
+    ,param(NRS_episodes, numEpisodesRS)
+    ,randomSearch(Xs,Ys,NRS_episodes, [])
+    ,rsStatistics
+    .  
 
 
-% empty (X,Y):-
-%     \+ o(X,Y),
-%     \+ h(X,Y).
+mainAStartSearch :-
+    initMain
+    ,s(Xs,Ys)
+    ,param(S_ahead, numStepsAhead)
+    ,param(N,mapSize)
+    ,initAStarOpenList(N,N)
+    ,aStarSearch(Xs,Ys,S_ahead, [])
+    ,rsStatistics
+    .  

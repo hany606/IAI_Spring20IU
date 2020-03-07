@@ -103,3 +103,20 @@ count([X1,Y1|T],X,Y,Z):- (X1\=X;Y1\=Y),count(T,X,Y,Z).
 func :-
     assertz(paths([1,2,3,4,3,4,4,4])),
     assertz(paths([1,2,5,4,5,4,6,4])).
+
+
+:- dynamic lssst/3.
+
+try :-
+    asserta(lsst(1,2,1)),
+    asserta(lsst(1,2,2)),
+    asserta(lsst(1,2,0)).
+
+min_mod :-
+    bagof(V,lsst(1,2,V),List),
+    write(List),
+    min(List,L),
+    write(L).
+
+:- [library(aggregate)].
+min(L,M) :- order_by([asc(M)], member(M,L)), !.
