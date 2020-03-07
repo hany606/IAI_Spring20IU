@@ -1,7 +1,7 @@
 /*
     Author: Hany Hamed
     Description: File for Rules for Assignment 1 in Intro to AI Spring 2020 Innopolis University
-    Resources:
+    Resources & References:
     - https://stackoverflow.com/questions/4805601/read-a-file-line-by-line-in-prolog
     - https://www.swi-prolog.org/pldoc/doc_for?object=re_split/3
     - https://stackoverflow.com/questions/22747147/swi-prolog-write-to-file
@@ -9,6 +9,11 @@
     - https://stackoverflow.com/questions/32691313/counter-in-prolog (Counter part)
     - https://stackoverflow.com/questions/42466637/decrement-the-same-variable-in-prolog
     - http://rigaux.org/language-study/syntax-across-languages-per-language/Prolog.html
+    - http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
+    - https://qiao.github.io/PathFinding.js/visual/
+    - http://www.sfu.ca/~arashr/warren.pdf
+    - https://www.wikiwand.com/en/Admissible_heuristic
+    - https://cs.stanford.edu/people/eroberts/courses/soco/projects/2003-04/intelligent-search/astar.html
 */
 
 /*
@@ -41,10 +46,10 @@ param(1, numStepsAhead).
 :- dynamic aStarOpenList/3.
 :- dynamic aStarClosedList/3.
 
+
+:- dynamic minOpenList/1.
+
 % --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-% Source: https://stackoverflow.com/questions/3965054/prolog-find-minimum-in-a-list/8414574#8414574
-:- [library(aggregate)].
-min(L,M) :- order_by([asc(M)], member(M,L)), !.
 
 
 % --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -371,23 +376,27 @@ addNeighbourhood(X,Y,N,P) :-
                 % There is a human, then it is a handover with cost 1
                 h(Xu,Yu) ->
                 (
-                    bagof(GC,aStarOpenList(X,Y,GC),List),
-                    min(List,Gcost_old),
+                    % bagof(GC,aStarOpenList(X,Y,GC),List),
+                    % min(List,Gcost_old),
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xu,Yu,_)) ->
                     (
                         Gcost_new is Gcost_old +1,
-                        
+                        format(" with cost ~d",[Gcost_new]),
                         asserta(aStarOpenList(Xu,Yu,Gcost_new)) 
                     )
                 );
                 % There is no human and valid then it is an empty cell, then it is move, cost 2
                 (not(h(Xu,Yu))) ->
                 (
-                    bagof(GC,aStarOpenList(X,Y,GC),List),
-                    min(List,Gcost_old),
-
+                    % bagof(GC,aStarOpenList(X,Y,GC),List),
+                    % min(List,Gcost_old),
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xu,Yu,_)) ->
                     (
                         Gcost_new is Gcost_old +2,
                         
+                        format(" with cost ~d",[Gcost_new]),
                         asserta(aStarOpenList(Xu,Yu,Gcost_new))
                     )
                 )
@@ -399,12 +408,14 @@ addNeighbourhood(X,Y,N,P) :-
                 % , otherwise the heuristic cost is zero as in the above predicates
                 (t(Xu,Yu)) ->
                 (
-                    bagof(GC,aStarOpenList(X,Y,GC),List),
-                    min(List,Gcost_old),
-
+                    % bagof(GC,aStarOpenList(X,Y,GC),List),
+                    % min(List,Gcost_old),
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xu,Yu,_)) ->
                     (
                         Gcost_new is Gcost_old - 1,
                         
+                        format(" with cost ~d",[Gcost_new]),
                         asserta(aStarOpenList(Xu,Yu,Gcost_new))
                     )
                 )
@@ -424,23 +435,27 @@ addNeighbourhood(X,Y,N,P) :-
                 % There is a human, then it is a handover with cost 1
                 h(Xd,Yd) ->
                 (
-                    bagof(GC,aStarOpenList(X,Y,GC),List),
-                    min(List,Gcost_old),
-
+                    % bagof(GC,aStarOpenList(X,Y,GC),List),
+                    % min(List,Gcost_old),
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xd,Yd,_)) ->
                     (
                         Gcost_new is Gcost_old +1,
                         
+                        format(" with cost ~d",[Gcost_new]),
                         asserta(aStarOpenList(Xd,Yd,Gcost_new))
                     )
                 );
                 (not(h(Xd,Yd))) ->
                 (
-                    bagof(GC,aStarOpenList(X,Y,GC),List),
-                    min(List,Gcost_old),
-
+                    % bagof(GC,aStarOpenList(X,Y,GC),List),
+                    % min(List,Gcost_old),
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xd,Yd,_)) ->
                     (
                         Gcost_new is Gcost_old +2,
                         
+                        format(" with cost ~d",[Gcost_new]),
                         asserta(aStarOpenList(Xd,Yd,Gcost_new))
                     )
                 )
@@ -448,12 +463,14 @@ addNeighbourhood(X,Y,N,P) :-
                 ;
                 (t(Xd,Yd)) ->
                 (
-                    bagof(GC,aStarOpenList(X,Y,GC),List),
-                    min(List,Gcost_old),
-
+                    % bagof(GC,aStarOpenList(X,Y,GC),List),
+                    % min(List,Gcost_old),
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xd,Yd,_)) ->
                     (
                         Gcost_new is Gcost_old - 1,
                         
+                        format(" with cost ~d",[Gcost_new]),
                         asserta(aStarOpenList(Xd,Yd,Gcost_new))   
                     )
                 )
@@ -474,23 +491,27 @@ addNeighbourhood(X,Y,N,P) :-
                 % There is a human, then it is a handover with cost 1
                 h(Xr,Yr) ->
                 (   
-                    bagof(GC,aStarOpenList(X,Y,GC),List),
-                    min(List,Gcost_old),
-
+                    % bagof(GC,aStarOpenList(X,Y,GC),List),
+                    % min(List,Gcost_old),
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xr,Yr,_)) ->
                     (
                         Gcost_new is Gcost_old +1,
                         
+                        format(" with cost ~d",[Gcost_new]),
                         asserta(aStarOpenList(Xr,Yr,Gcost_new)) 
                     )
                 );
                 (not(h(Xr,Yr))) ->
                 (
-                    bagof(GC,aStarOpenList(X,Y,GC),List),
-                    min(List,Gcost_old),
-
+                    % bagof(GC,aStarOpenList(X,Y,GC),List),
+                    % min(List,Gcost_old),
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xr,Yr,_)) ->
                     (
-                        Gcost_new is Gcost_old +1,
+                        Gcost_new is Gcost_old +2,
                         
+                        format(" with cost ~d",[Gcost_new]),
                         asserta(aStarOpenList(Xr,Yr,Gcost_new))
                     )
                 )
@@ -498,12 +519,14 @@ addNeighbourhood(X,Y,N,P) :-
                 ;
                 (t(Xr,Yr)) ->
                 (
-                    bagof(GC,aStarOpenList(X,Y,GC),List),
-                    min(List,Gcost_old),
-
+                    % bagof(GC,aStarOpenList(X,Y,GC),List),
+                    % min(List,Gcost_old),
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xr,Yr,_)) ->
                     (
                         Gcost_new is Gcost_old - 1,
                         
+                        format(" with cost ~d",[Gcost_new]),
                         asserta(aStarOpenList(Xr,Yr,Gcost_new))
                     )
                 )
@@ -523,32 +546,39 @@ addNeighbourhood(X,Y,N,P) :-
                 % There is a human, then it is a handover with cost 1
                 h(Xl,Yl) ->
                 (
-                    bagof(GC,aStarOpenList(X,Y,GC),List),
-                    min(List,Gcost_old),
-
+                    % bagof(GC,aStarOpenList(X,Y,GC),List),
+                    % min(List,Gcost_old),
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xl,Yl,_)) ->
                     (
                         Gcost_new is Gcost_old +1,
+                        format(" with cost ~d",[Gcost_new]),
                         asserta(aStarOpenList(Xl,Yl,Gcost_new))
                     )
                 );
                 (not(h(Xl,Yl))) ->
                 (
-                    bagof(GC,aStarOpenList(X,Y,GC),List),
-                    min(List,Gcost_old),
-
+                    % bagof(GC,aStarOpenList(X,Y,GC),List),
+                    % min(List,Gcost_old),
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xl,Yl,_)) ->
                     (
                         Gcost_new is Gcost_old +2,
-                        assertz(aStarOpenList(Xl,Yl,Gcost_new))
+                        format(" with cost ~d",[Gcost_new]),
+                        asserta(aStarOpenList(Xl,Yl,Gcost_new))
                     )
                 )
                 % long_pass
                 ;
                 (t(Xl,Yl)) ->
                 (
-                    bagof(GC,aStarOpenList(X,Y,GC),List),
-                    min(List,Gcost_old),
+                    % bagof(GC,aStarOpenList(X,Y,GC),List),
+                    % min(List,Gcost_old),
+                    aStarClosedList(X,Y,Gcost_old),
+                    not(aStarClosedList(Xl,Yl,_)) ->
                     (
                         Gcost_new is Gcost_old - 1,
+                        format(" with cost ~d",[Gcost_new]),
                         asserta(aStarOpenList(Xl,Yl,Gcost_new))   
                     )
                 )
@@ -563,20 +593,83 @@ addNeighbourhood(X,Y,N,P) :-
     )
 ). 
 
-% addNeighbourhoods
+% Source: https://stackoverflow.com/questions/36411848/how-to-use-tranpose-and-findall-to-print-all-the-variables-in-a-predicate
+getOpenList(List) :- findall([X,Y,V], aStarOpenList(X,Y,V), List).
+printOpenList([]) :- !.
+printOpenList([[X,Y,V]|T]) :- format('\n! X: ~d,Y: ~d,V: ~d', [X,Y,V]),printOpenList(T).
 
-initTest :-
-    initMain,
-    asserta(aStarOpenList(2,3,0)).
-test :-
-    addNeighbourhood(2,3,0,[2,3|P]).
+getClosedList(List) :- findall([X,Y,V], aStarClosedList(X,Y,V), List).
+printClosedList([]) :- !.
+printClosedList([[X,Y,V]|T]) :- format('\n! X: ~d,Y: ~d,V: ~d', [X,Y,V]),printClosedList(T).
 
-aStarSearch(X,Y,NStepsAhead,P) :- 
-    addNeighbourhood(X,Y,0,[X,Y|P]),
-    selectMinNode(X,Y, Xnew, Ynew),
-    aStarSearch(Xnew,Ynew, NStepsAhead, [X,Y|P]),
-    true.
 
+newList([]) :- !.
+newList([[X,Y,V]|T]) :- 
+    minOpenList(VV),
+    (V < VV) -> 
+    (
+        retractall(minOpenList(_)),
+        asserta(minOpenList(V)),
+        newList(T)
+    );
+    newList(T).
+
+% getMinOpenList([]) :- !.
+% getMinOpenList(V,Vnew,[[_,_,Vi]|T]) :- (Vi < V) -> Vnew is Vi, V is Vi, getMinOpenList(V,Vnewnew).
+
+selectMinNode(Xn,Yn) :-
+    getOpenList(List),
+    % format('\n -------------------------- Open List ---------------------------\n'),
+    % printOpenList(List),
+    % format('\n -----------------------------------------------------\n'),
+    % getClosedList(CList),
+    % format('\n -------------------------- Closed List ---------------------------\n'),
+    % printClosedList(CList),
+    % format('\n -----------------------------------------------------\n'),
+    retractall(minOpenList(_)),
+    asserta(minOpenList(50000)),
+    newList(List),
+    minOpenList(C),
+    format('\n final minimum cost ~d', C),
+    aStarOpenList(Xn,Yn,C),
+    inPath(Xn,Yn,P,R).
+
+
+
+% getPath([], _) :- !.
+
+% getPath(P,Pp) :-
+%     Pp is P.
+
+
+aStarSearch(X,Y,NStepsAhead,P) :-
+    aStarOpenList(X,Y,V), 
+    retractall(aStarOpenList(X,Y,_)),
+    asserta(aStarClosedList(X,Y,V)),
+    format('\nCurrent in (~d,~d)', [X,Y]),
+    
+    getOpenList(OList),
+    format('\n -------------------------- Open List ---------------------------\n'),
+    printOpenList(OList),
+    format('\n -----------------------------------------------------\n'),
+    getClosedList(CList),
+    format('\n -------------------------- Closed List ---------------------------\n'),
+    printClosedList(CList),
+    format('\n -----------------------------------------------------\n'),
+
+    t(Xt,Yt), 
+    (reached(X,Y); aStarOpenList(Xt,Yt,Vt)) -> 
+    (
+        retractall(aStarOpenList(Xt,Yt,_)),
+        asserta(aClosedList(Xt,Yt,Vt)),
+        Pp = [Xt,Yt|P],
+        % getPath(P,Pp),
+        printlst(Pp),true);
+    addNeighbourhood(X,Y,0,[X,Y|P]);
+    selectMinNode(Xnew, Ynew),
+    format('\n\n------------------ Selected (~d,~d) -------------------------\n\n', [Xnew, Ynew]),
+    aStarOpenList(Xw,Yw,Vw),
+    aStarSearch(Xnew,Ynew, NStepsAhead, [X,Y|P]).
 
 qTableRL(X,Y) :-
     true.
@@ -617,7 +710,6 @@ mainAStartSearch :-
     ,s(Xs,Ys)
     ,param(S_ahead, numStepsAhead)
     ,param(N,mapSize)
-    ,initAStarOpenList(N,N)
+    ,asserta(aStarOpenList(2,3,0))
     ,aStarSearch(Xs,Ys,S_ahead, [])
-    ,rsStatistics
     .  
