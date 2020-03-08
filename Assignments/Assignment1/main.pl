@@ -96,7 +96,7 @@ initMap :-
     PathLimitCount is Z*Z,
     asserta(optimalPathCount(PathLimitCount,0)),
     retractall(optimalPath(_)),
-    initsteps.
+    initpasscounter.
 
 restartMap :-
     resetMap,
@@ -215,9 +215,15 @@ pass(X,Y) :-
     true.
 
 
+validPass :-
+    (passcounter(C),
+    (C == 0),
+    format('\nValid Pass\n')); (format('\n Not Valid Pass\n'), false).
+
 passU(X,Y,Xu,Yu,V,P) :-
     succ(Y, Ynew), Xu is X,
     format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+    validPass,
     (
         valid(X,Ynew,Vv,P),
         (
@@ -229,7 +235,7 @@ passU(X,Y,Xu,Yu,V,P) :-
             ((Vv == 0), not(h(X,Ynew))) -> 
             (
                 format('\n Valid cell but did not find human, searching forward'),
-                passU(Xu,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu
+                passU(Xu,Ynew,_,Yuu,_,P),Yu is Yuu
             );
             format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
             Yu is Y, V is 0

@@ -1,20 +1,20 @@
-:- dynamic stepscounter/1.
+:- dynamic passcounter/1.
 
-initsteps :-
-    retractall(stepscounter(_)),
-    assertz(stepscounter(0)).
+initpasscounter :-
+    retractall(passcounter(_)),
+    assertz(passcounter(0)).
 
-incrsteps :-
-    stepscounter(V),
-    retractall(stepscounter(_)),
+incrpasscounter :-
+    passcounter(V),
+    retractall(passcounter(_)),
     succ(V, V1),
-    assertz(stepscounter(V1)).
+    assertz(passcounter(V1)).
 
-decrsteps :-
-    stepscounter(V),
-    retractall(stepscounter(_)),
+decrpasscounter :-
+    passcounter(V),
+    retractall(passcounter(_)),
     succ(V0, V),
-    assertz(stepscounter(V0)).
+    assertz(passcounter(V0)).
 
 %--------------------------------
 :- dynamic rscounter/1.
