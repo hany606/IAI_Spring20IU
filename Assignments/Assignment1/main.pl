@@ -218,184 +218,173 @@ pass(X,Y) :-
 validPass :-
     (passcounter(C),
     (C == 0),
-    format('\nValid Pass\n')); (format('\n Not Valid Pass\n'), false).
+    format('\nValid Pass if applicable; not execeeding the number of the valid passes during the gameplay'));
+    (format('\n Not Valid Pass\n'), false).
+
+testPass :-
+    passUR(1,1,X,Y,V,[]),
+    format('\nValue ~d Pass ~d ,~d\n', [V,X,Y]),
+    (V == 0)->(
+        format('\nValue ~d Pass ~d ,~d\n', [V,X,Y]),
+        incrpasscounter,
+        passR(X,Y,Xn,Yn,Vv,[]),
+        (Vv == 0)->(
+        % passR(X,Y,Xn,Yn,Vu,[]),
+        format('\n~d ,~d\n', [Xn,Yn]))
+    ).
 
 passU(X,Y,Xu,Yu,V,P) :-
     succ(Y, Ynew), Xu is X,
-    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
-    validPass,
+    format('\nCurrent cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+    (validPass, (valid(X,Ynew,Vv,P)))->
     (
-        valid(X,Ynew,Vv,P),
-        (
             ((Vv == 0), h(X,Ynew)) -> 
             (
                 format('\n Found Human'),
-                Yu is Ynew, V is 1
+                Yu is Ynew, V is 0
             );
             ((Vv == 0), not(h(X,Ynew))) -> 
             (
                 format('\n Valid cell but did not find human, searching forward'),
-                passU(Xu,Ynew,_,Yuu,_,P),Yu is Yuu
+                passU(Xu,Ynew,_,Yuu,Vu,P),Yu is Yuu, V is Vu
             );
             format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
-            Yu is Y, V is 0
-        )
-    ).
+            Yu is Y, V is Vv
+    );V is 4.
 
 passD(X,Y,Xu,Yu,V,P) :-
     succ(Ynew, Y), Xu is X,
-    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+    format('\nCurrent cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+    (validPass, (valid(X,Ynew,Vv,P)))->
     (
-        valid(X,Ynew,Vv,P),
-        (
             ((Vv == 0), h(X,Ynew)) -> 
             (
                 format('\n Found Human'),
-                Yu is Ynew, V is 1
+                Yu is Ynew, V is 0
             );
-            ((Vv == 0), not(h(X,Ynew))) -> 
+            ((Vv == 0; Vv == 3), not(h(X,Ynew))) -> 
             (
                 format('\n Valid cell but did not find human, searching forward'),
-                passU(Xu,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu
+                passU(Xu,Ynew,_,Yuu,Vu,P),Yu is Yuu, V is Vu
             );
             format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
-            Yu is Y, V is 0
-        )
-    ).
+            Yu is Y, V is Vv
+    );V is 4.
 
-passR(X,Y,Xu,Yu,V,P) :-
-    succ(Y, Ynew), Xu is X,
-    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
-    (
-        valid(X,Ynew,Vv,P),
-        (
-            ((Vv == 0), h(X,Ynew)) -> 
-            (
-                format('\n Found Human'),
-                Yu is Ynew, V is 1
-            );
-            ((Vv == 0), not(h(X,Ynew))) -> 
-            (
-                format('\n Valid cell but did not find human, searching forward'),
-                passU(Xu,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu
-            );
-            format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
-            Yu is Y, V is 0
-        )
-    ).
 
-passL(X,Y,Xu,Yu,V,P) :-
-    succ(Y, Ynew), Xu is X,
-    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+passR(X,Y,Xr,Yr,V,P) :-
+    succ(X, Xnew), Yr is Y,
+    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xnew,Yr]),
+    (validPass, (valid(Xnew,Y,Vv,P))) ->
     (
-        valid(X,Ynew,Vv,P),
+        ((Vv == 0; Vv == 3), h(Xnew,Y)) -> 
         (
-            ((Vv == 0), h(X,Ynew)) -> 
-            (
-                format('\n Found Human'),
-                Yu is Ynew, V is 1
-            );
-            ((Vv == 0), not(h(X,Ynew))) -> 
-            (
-                format('\n Valid cell but did not find human, searching forward'),
-                passU(Xu,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu
-            );
-            format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
-            Yu is Y, V is 0
-        )
-    ).
+            format('\n Found Human'),
+            Xr is Xnew, V is 0
+        );
+        ((Vv == 0; Vv == 3), not(h(Xnew,Y))) -> 
+        (
+            format('\n Valid cell but did not find human, searching forward'),
+            passR(Xnew,Yr,Xrr,_,Vr,P),Xr is Xrr, V is Vr
+        );
+        format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
+        Xr is X, V is Vv
+    ); V is 4.
+
+passL(X,Y,Xl,Yl,V,P) :-
+    succ(Xnew,X), Yl is Y,
+    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xnew,Yl]),
+    (validPass, (valid(Xnew,Y,Vv,P))) ->
+    (
+        ((Vv == 0; Vv == 3), h(Xnew,Y)) -> 
+        (
+            format('\n Found Human'),
+            Xl is Xnew, V is 0
+        );
+        ((Vv == 0; Vv == 3), not(h(Xnew,Y))) -> 
+        (
+            format('\n Valid cell but did not find human, searching forward'),
+            passL(Xnew,Yl,Xll,_,Vl,P),Xl is Xll, V is Vl
+        );
+        format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
+        Xl is X, V is Vv
+    ); V is 4.
 
 passUR(X,Y,Xu,Yu,V,P) :-
-    succ(Y, Ynew), Xu is X,
-    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+    succ(Y, Ynew), succ(X, Xnew),
+    format('\nCurrent cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xnew,Ynew]),
+    (validPass, (valid(Xnew,Ynew,Vv,P)))->
     (
-        valid(X,Ynew,Vv,P),
-        (
-            ((Vv == 0), h(X,Ynew)) -> 
+            ((Vv == 0; Vv == 3), h(Xnew,Ynew)) -> 
             (
                 format('\n Found Human'),
-                Yu is Ynew, V is 1
+                Yu is Ynew, Xu is Xnew, V is 0
             );
-            ((Vv == 0), not(h(X,Ynew))) -> 
+            ((Vv == 0; Vv == 3), not(h(Xnew,Ynew))) -> 
             (
                 format('\n Valid cell but did not find human, searching forward'),
-                passU(Xu,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu
+                passUR(Xnew,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu, Xu is Xuu, V is Vu
             );
-            format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
-            Yu is Y, V is 0
-        )
-    ).
+            format('\n Validation Value: ~d \nNot applicable pass due to the false validation of the cell (Border or has orc)',Vv),
+            Yu is Y, Xu is X, V is Vv
+    );V is 4.
 
 passUL(X,Y,Xu,Yu,V,P) :-
-    succ(Y, Ynew), Xu is X,
-    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+    succ(Y, Ynew), succ(Xnew, X),
+    format('\nCurrent cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xnew,Ynew]),
+    (validPass, (valid(Xnew,Ynew,Vv,P)))->
     (
-        valid(X,Ynew,Vv,P),
-        (
-            ((Vv == 0), h(X,Ynew)) -> 
+            ((Vv == 0; Vv == 3), h(Xnew,Ynew)) -> 
             (
                 format('\n Found Human'),
-                Yu is Ynew, V is 1
+                Yu is Ynew, Xu is Xnew, V is 0
             );
-            ((Vv == 0), not(h(X,Ynew))) -> 
+            ((Vv == 0; Vv == 3), not(h(Xnew,Ynew))) -> 
             (
                 format('\n Valid cell but did not find human, searching forward'),
-                passU(Xu,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu
+                passUL(Xnew,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu, Xu is Xuu, V is Vu
             );
             format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
-            Yu is Y, V is 0
-        )
-    ).
+            Yu is Y, Xu is X, V is Vv
+    );V is 4.
 
 passDR(X,Y,Xu,Yu,V,P) :-
-    succ(Y, Ynew), Xu is X,
-    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+    succ(Ynew, Y), succ(X, Xnew),
+    format('\nCurrent cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xnew,Ynew]),
+    (validPass, (valid(Xnew,Ynew,Vv,P)))->
     (
-        valid(X,Ynew,Vv,P),
-        (
-            ((Vv == 0), h(X,Ynew)) -> 
+            ((Vv == 0; Vv == 3), h(Xnew,Ynew)) -> 
             (
                 format('\n Found Human'),
-                Yu is Ynew, V is 1
+                Yu is Ynew, Xu is Xnew, V is 0
             );
-            ((Vv == 0), not(h(X,Ynew))) -> 
+            ((Vv == 0; Vv == 3), not(h(Xnew,Ynew))) -> 
             (
                 format('\n Valid cell but did not find human, searching forward'),
-                passU(Xu,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu
+                passDR(Xnew,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu, Xu is Xuu, V is Vu
             );
             format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
-            Yu is Y, V is 0
-        )
-    ).
+            Yu is Y, Xu is X, V is Vv
+    );V is 4.
+
 passDL(X,Y,Xu,Yu,V,P) :-
-    succ(Y, Ynew), Xu is X,
-    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+    succ(Ynew, Y), succ(Xnew, X),
+    format('\nCurrent cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xnew,Ynew]),
+    (validPass, (valid(Xnew,Ynew,Vv,P)))->
     (
-        valid(X,Ynew,Vv,P),
-        (
-            ((Vv == 0), h(X,Ynew)) -> 
+            ((Vv == 0; Vv == 3), h(Xnew,Ynew)) -> 
             (
                 format('\n Found Human'),
-                Yu is Ynew, V is 1
+                Yu is Ynew, Xu is Xnew, V is 0
             );
-            ((Vv == 0), not(h(X,Ynew))) -> 
+            ((Vv == 0; Vv == 3), not(h(Xnew,Ynew))) -> 
             (
                 format('\n Valid cell but did not find human, searching forward'),
-                passU(Xu,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu
+                passDL(Xnew,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu, Xu is Xuu, V is Vu
             );
             format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
-            Yu is Y, V is 0
-        )
-    ).
-
-
-
-% passU(X,Y,Xu,Yu) :-
-    % validation,
-    % pass to the human on that line,
-    % change the y to the coordinate.
-
-
+            Yu is Y, Xu is X, V is Vv
+    );V is 4.
 
 % --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
