@@ -1,20 +1,22 @@
 printlst([]).
 
-printlst([X,Y|T]) :-
-    format('(~d,~d), ', [X,Y]),
+printlst([X,Y,Ty|T]) :-
+    format('~w(~d,~d), ', [Ty,X,Y]),
     printlst(T).
+
 
 % Source: Lab(intro to prolog2) slides
 lengthlst([],0).
 
-lengthlst([_|T],N) :-
+lengthlst([X,Y,Ty|T],N) :-
     lengthlst(T,Nsub),
     succ(Nsub,N).
 
 % Based on (Source): https://stackoverflow.com/questions/9088062/count-the-number-of-occurrences-of-a-number-in-a-list
-count([],_,_,0).
-count([X,Y|T],X,Y,Znew):- count(T,X,Y,Z), Znew is 1+Z.
-count([X1,Y1|T],X,Y,Z):- (X1\=X;Y1\=Y),count(T,X,Y,Z).
+% Counnt number of times that X,Y exists in a list
+count([],_,_,_,0).
+count([X,Y,Ty|T],X,Y,Ty,Znew):- count(T,X,Y,Ty,Z), Znew is 1+Z.
+count([X1,Y1,Ty1|T],X,Y,Ty,Z):- (X1\=X;Y1\=Y),count(T,X,Y,Ty,Z).
 
 % lst(X,Y,0,P) :-
 %     printlst(P,0).

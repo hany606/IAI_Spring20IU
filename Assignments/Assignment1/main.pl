@@ -104,12 +104,12 @@ restartMap :-
 
 
 % --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-inPath(X,Y,P,R) :-
-    count(P,X,Y,C),
+inPath(X,Y,T,P,R) :-
+    count(P,X,Y,T,C),
     (C =< 1) -> R is 0;     % as the visited cell is in the path is two times in the path at most (in, out)
     R is 1.
 
-valid(X,Y,V,P) :-
+valid(X,Y,T,V,P) :-
 (
     (mapBoarders(X,Y)) ->
     (
@@ -121,7 +121,7 @@ valid(X,Y,V,P) :-
         succ(1,V),
         format('\n(~d, ~d) is an Orc cell', [X,Y])
     );
-    inPath(X,Y,P,R),
+    inPath(X,Y,T,P,R),
     (R == 1) ->
     (
         succ(2,V),
@@ -145,28 +145,28 @@ move(X,Y,P,N) :-
     ((Vu == 1) ->
         Nnew is N +1,
         format('\nUp to ~d ~d in step ~d', [Xu, Yu, Nnew]),
-        backtrackSearch(Xu,Yu, [Xu,Yu|P])
+        backtrackSearch(Xu,Yu, [Xu,Yu,m|P])
     );
     format('\n#Current in ~d ~d and deciding, Check Down', [X,Y]),
     nextDown(X,Y,Xd,Yd,Vd,P),
     ((Vd == 1) ->
         Nnew is N +1,
         format('\nDown to ~d ~d in step ~d', [Xd, Yd, Nnew]),
-        backtrackSearch(Xd,Yd, [Xd,Yd|P])
+        backtrackSearch(Xd,Yd, [Xd,Yd,m|P])
     );
     format('\n#Current in ~d ~d and deciding, Check Right', [X,Y]),
     nextRight(X,Y,Xr,Yr,Vr,P),
     ((Vr == 1) ->
         Nnew is N +1,
         format('\nRight to ~d ~d in step ~d', [Xr, Yr, Nnew]),
-        backtrackSearch(Xr,Yr, [Xr,Yr|P])
+        backtrackSearch(Xr,Yr, [Xr,Yr,m|P])
     );
     format('\n#Current in ~d ~d and deciding, Check Left', [X,Y]),
     nextLeft(X,Y,Xl,Yl,Vl,P),
     ((Vl == 1) ->
         Nnew is N +1,
         format('\nLeft to ~d ~d in step ~d', [Xl, Yl, Nnew]),
-        backtrackSearch(Xl,Yl, [Xl,Yl|P])
+        backtrackSearch(Xl,Yl, [Xl,Yl,m|P])
     )
 ). 
 
@@ -174,7 +174,7 @@ nextUp(X,Y,Xu,Yu,V,P) :-
 (
     succ(Y, Ynew), Xu is X,
     (
-        valid(X,Ynew,Vv,P),
+        valid(X,Ynew,m,Vv,P),
         (Vv == 0) -> Yu is Ynew, V is 1;
         Yu is Y, V is 0
     )
@@ -184,7 +184,7 @@ nextDown(X,Y,Xd,Yd,V,P) :-
 (
     succ(Ynew, Y), Xd is X,
     (
-        valid(X,Ynew,Vv,P),
+        valid(X,Ynew,m,Vv,P),
         (Vv == 0)  -> Yd is Ynew, V is 1; 
         Yd is Y
     )
@@ -195,7 +195,7 @@ nextRight(X,Y,Xr,Yr,V,P) :-
 (
     succ(X, Xnew), Yr is Y,
     (
-        valid(Xnew,Y,Vv,P),
+        valid(Xnew,Y,m,Vv,P),
         (Vv == 0) -> Xr is Xnew, V is 1;
         Xr is X
     )
@@ -204,15 +204,73 @@ nextLeft(X,Y,Xl,Yl,V,P) :-
 (
     succ(Xnew, X), Yl is Y,
     (
-        valid(Xnew,Y,Vv,P),
+        valid(Xnew,Y,m,Vv,P),
         (Vv == 0) -> Xl is Xnew, V is 1; 
         Xl is X
     )
 ).
 
 
-pass(X,Y) :-
-    true.
+pass(X,Y,P,N) :-
+(
+    format('\n ----Step---- ~d', [N]),
+    format('\n#Current in ~d ~d and deciding, Check Passing Up', [X,Y]),
+    passU(X,Y,Xu,Yu,Vu,P),
+    ((Vu == 0) ->
+        incrpasscounter,
+        format('\nPass Up to ~d ~d in step ~d (Number of steps did not change)', [Xu, Yu, N]),
+        backtrackSearch(Xu,Yu, [Xu,Yu,p|P])
+    );
+    format('\n#Current in ~d ~d and deciding, Check Passing Down', [X,Y]),
+    passD(X,Y,Xd,Yd,Vd,P),
+    ((Vd == 0) ->
+        incrpasscounter,
+        format('\nPass Down to ~d ~d in step ~d (Number of steps did not change)', [Xd, Yd, N]),
+        backtrackSearch(Xd,Yd, [Xd,Yd,p|P])
+    );
+    format('\n#Current in ~d ~d and deciding, Check Passing Right', [X,Y]),
+    passR(X,Y,Xr,Yr,Vr,P),
+    ((Vr == 0) ->
+        incrpasscounter,
+        format('\nPass Right to ~d ~d in step ~d (Number of steps did not change)', [Xr, Yr, N]),
+        backtrackSearch(Xr,Yr, [Xr,Yr,p|P])
+    );
+    format('\n#Current in ~d ~d and deciding, Check Passing Left', [X,Y]),
+    passL(X,Y,Xl,Yl,Vl,P),
+    ((Vl == 0) ->
+        incrpasscounter,
+        format('\nPass Left to ~d ~d in step ~d (Number of steps did not change)', [Xl, Yl, N]),
+        backtrackSearch(Xl,Yl, [Xl,Yl,p|P])
+    );
+    format('\n#Current in ~d ~d and deciding, Check Passing Up Right (Diagonal)', [X,Y]),
+    passUR(X,Y,Xur,Yur,Vur,P),
+    ((Vur == 0) ->
+        incrpasscounter,
+        format('\nPass Up to ~d ~d in step ~d (Number of steps did not change)', [Xur, Yur, N]),
+        backtrackSearch(Xur,Yur, [Xur,Yur,p|P])
+    );
+    format('\n#Current in ~d ~d and deciding, Check Passing Up Left (Diagonal)', [X,Y]),
+    passUL(X,Y,Xul,Yul,Vul,P),
+    ((Vul == 0) ->
+        incrpasscounter,
+        format('\nPass Up to ~d ~d in step ~d (Number of steps did not change)', [Xul, Yul, N]),
+        backtrackSearch(Xul,Yul, [Xul,Yul,p|P])
+    );
+    format('\n#Current in ~d ~d and deciding, Check Passing Down Right (Diagonal)', [X,Y]),
+    passDR(X,Y,Xdr,Ydr,Vdr,P),
+    ((Vdr == 0) ->
+        incrpasscounter,
+        format('\nPass Down to ~d ~d in step ~d (Number of steps did not change)', [Xdr, Ydr, N]),
+        backtrackSearch(Xdr,Ydr, [Xdr,Ydr,p|P])
+    );
+    format('\n#Current in ~d ~d and deciding, Check Passing Down Left (Diagonal)', [X,Y]),
+    passDL(X,Y,Xdl,Ydl,Vdl,P),
+    ((Vdl == 0) ->
+        incrpasscounter,
+        format('\nPass Down to ~d ~d in step ~d (Number of steps did not change)', [Xdl, Ydl, N]),
+        backtrackSearch(Xdl,Ydl, [Xdl,Ydl,p|P])
+    )
+). 
 
 
 validPass :-
@@ -236,7 +294,7 @@ testPass :-
 passU(X,Y,Xu,Yu,V,P) :-
     succ(Y, Ynew), Xu is X,
     format('\nCurrent cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
-    (validPass, (valid(X,Ynew,Vv,P)))->
+    (validPass, (valid(X,Ynew,p,Vv,P)))->
     (
             ((Vv == 0), h(X,Ynew)) -> 
             (
@@ -255,7 +313,7 @@ passU(X,Y,Xu,Yu,V,P) :-
 passD(X,Y,Xu,Yu,V,P) :-
     succ(Ynew, Y), Xu is X,
     format('\nCurrent cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
-    (validPass, (valid(X,Ynew,Vv,P)))->
+    (validPass, (valid(X,Ynew,p,Vv,P)))->
     (
             ((Vv == 0), h(X,Ynew)) -> 
             (
@@ -274,8 +332,8 @@ passD(X,Y,Xu,Yu,V,P) :-
 
 passR(X,Y,Xr,Yr,V,P) :-
     succ(X, Xnew), Yr is Y,
-    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xnew,Yr]),
-    (validPass, (valid(Xnew,Y,Vv,P))) ->
+    format('\nCurrent cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xnew,Yr]),
+    (validPass, (valid(Xnew,Y,p,Vv,P))) ->
     (
         ((Vv == 0; Vv == 3), h(Xnew,Y)) -> 
         (
@@ -293,8 +351,8 @@ passR(X,Y,Xr,Yr,V,P) :-
 
 passL(X,Y,Xl,Yl,V,P) :-
     succ(Xnew,X), Yl is Y,
-    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xnew,Yl]),
-    (validPass, (valid(Xnew,Y,Vv,P))) ->
+    format('\nCurrent cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xnew,Yl]),
+    (validPass, (valid(Xnew,Y,p,Vv,P))) ->
     (
         ((Vv == 0; Vv == 3), h(Xnew,Y)) -> 
         (
@@ -313,7 +371,7 @@ passL(X,Y,Xl,Yl,V,P) :-
 passUR(X,Y,Xu,Yu,V,P) :-
     succ(Y, Ynew), succ(X, Xnew),
     format('\nCurrent cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xnew,Ynew]),
-    (validPass, (valid(Xnew,Ynew,Vv,P)))->
+    (validPass, (valid(Xnew,Ynew,p,Vv,P)))->
     (
             ((Vv == 0; Vv == 3), h(Xnew,Ynew)) -> 
             (
@@ -332,7 +390,7 @@ passUR(X,Y,Xu,Yu,V,P) :-
 passUL(X,Y,Xu,Yu,V,P) :-
     succ(Y, Ynew), succ(Xnew, X),
     format('\nCurrent cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xnew,Ynew]),
-    (validPass, (valid(Xnew,Ynew,Vv,P)))->
+    (validPass, (valid(Xnew,Ynew,p,Vv,P)))->
     (
             ((Vv == 0; Vv == 3), h(Xnew,Ynew)) -> 
             (
@@ -351,7 +409,7 @@ passUL(X,Y,Xu,Yu,V,P) :-
 passDR(X,Y,Xu,Yu,V,P) :-
     succ(Ynew, Y), succ(X, Xnew),
     format('\nCurrent cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xnew,Ynew]),
-    (validPass, (valid(Xnew,Ynew,Vv,P)))->
+    (validPass, (valid(Xnew,Ynew,p,Vv,P)))->
     (
             ((Vv == 0; Vv == 3), h(Xnew,Ynew)) -> 
             (
@@ -370,7 +428,7 @@ passDR(X,Y,Xu,Yu,V,P) :-
 passDL(X,Y,Xu,Yu,V,P) :-
     succ(Ynew, Y), succ(Xnew, X),
     format('\nCurrent cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xnew,Ynew]),
-    (validPass, (valid(Xnew,Ynew,Vv,P)))->
+    (validPass, (valid(Xnew,Ynew,p,Vv,P)))->
     (
             ((Vv == 0; Vv == 3), h(Xnew,Ynew)) -> 
             (
@@ -390,7 +448,7 @@ passDL(X,Y,Xu,Yu,V,P) :-
 
 % Save the path
 saveOptimalPath(X,Y,P,N) :-
-    format('\nGreat !!! ~d ~d in ~d steps', [X,Y,N]),
+    format('\nGreat !!! (~d, ~d) in ~d steps', [X,Y,N]),
     format('\nPrinting all the path in a reverse order from the end to the start\n'),
     printlst(P),
     format('\n----------Reached!!!----------\n'),
@@ -435,7 +493,7 @@ backtrackSearch(X,Y,P) :-
             not(isOptimalPath(N)) -> (
                 format('\n \t XXXXXXXXXX Not optimal path, discarded XXXXXXXXXX \n Reason: Number of current steps: ~d',[N])
             );
-            (move(X,Y,[X,Y|P],N), pass(X,Y))
+            (move(X,Y,[X,Y,m|P],N), pass(X,Y,[X,Y,p|P],N))
         )
     )    
 ).
@@ -477,48 +535,48 @@ randomSearch(X,Y,P) :-
         random(R),
         format('\n#Current in ~d ~d and deciding', [X,Y]),
         (
-            % (R >= 0, R < 0.083) ->
-            (R >= 0, R < 0.25) ->
+            (R >= 0, R < 0.083) ->
+            % (R >= 0, R < 0.25) ->
             (
                 nextUp(X,Y,Xnew,Ynew,_,[]),     % We don't want to check if it was visited before or not as it is random search
                 format('\nUp to ~d ~d', [Xnew, Ynew])
             );  
-            % (R >= 0.083, R < 0.1666) ->
-            (R >= 0.25, R < 0.5) ->
+            (R >= 0.083, R < 0.1666) ->
+            % (R >= 0.25, R < 0.5) ->
             (
                 nextDown(X,Y,Xnew,Ynew,_,[]),
                 format('\nDown to ~d ~d', [Xnew, Ynew])
 
             );
-            % (R >= 0.1666, R < 0.2499) ->
-            (R >= 0.50, R < 0.75) ->
+            (R >= 0.1666, R < 0.2499) ->
+            % (R >= 0.50, R < 0.75) ->
             (
                 nextRight(X,Y,Xnew,Ynew,_,[]),
                 format('\nRight to ~d ~d', [Xnew, Ynew])
             );
             %0.3332
-            % (R >= 0.2499, R =< 1) -> 
-            (R >= 0.75, R =< 1) -> 
+            (R >= 0.2499, R < 0.3332) -> 
+            % (R >= 0.75, R =< 1) -> 
             (
                 nextLeft(X,Y,Xnew,Ynew,_,[]),
                 format('\nLeft to ~d ~d', [Xnew, Ynew])
-            )%;
-            % (R >= 0.3332, R < 0.4165) ->
-            % (pass(X,Y));
-            % (R >= 0.4165, R < 0.4998) ->
-            % (pass(X,Y));
-            % (R >= 0.4998, R < 0.5831) ->
-            % (pass(X,Y));
-            % (R >= 0.5831, R < 0.6664) ->
-            % (pass(X,Y));
-            % (R >= 0.6664, R < 0.7497) ->
-            % (pass(X,Y));
-            % (R >= 0.7497, R < 0.833) ->
-            % (pass(X,Y));
-            % (R >= 0.833, R < 0.9163) ->
-            % (pass(X,Y));
-            % (R >= 0.9163, R =< 1) ->
-            % (pass(X,Y)),
+            );
+            (R >= 0.3332, R < 0.4165) ->
+            (passU(X,Y,Xnew,Ynew,_,[]));
+            (R >= 0.4165, R < 0.4998) ->
+            (passD(X,Y,Xnew,Ynew,_,[]));
+            (R >= 0.4998, R < 0.5831) ->
+            (passR(X,Y,Xnew,Ynew,_,[]));
+            (R >= 0.5831, R < 0.6664) ->
+            (passL(X,Y,Xnew,Ynew,_,[]));
+            (R >= 0.6664, R < 0.7497) ->
+            (passUR(X,Y,Xnew,Ynew,_,[]));
+            (R >= 0.7497, R < 0.833) ->
+            (passUL(X,Y,Xnew,Ynew,_,[]));
+            (R >= 0.833, R < 0.9163) ->
+            (passDR(X,Y,Xnew,Ynew,_,[]));
+            (R >= 0.9163, R =< 1) ->
+            (passDL(X,Y,Xnew,Ynew,_,[]))
         ),
         randomSearch(Xnew,Ynew,[Xnew,Ynew|P])
     )
@@ -538,7 +596,7 @@ addNeighbourhood(X,Y,N,P) :-
     param(NL, numStepsAhead),
     format('\n Adding Neighbours of (~d,~d) as step ahead ~d/~d', [X,Y,Ntmp,NL]),
     (
-        nextUp(X,Y,Xu,Yu,Vu,P),
+        nextUp(X,Y,Xu,Yu,Vu,[u|P]),
         ((Vu == 1) ->
             format('\nAdd Up to ~d ~d in Open List', [Xu, Yu]),
             (
@@ -546,8 +604,7 @@ addNeighbourhood(X,Y,N,P) :-
                 % There is a human, then it is a handover with cost 1
                 h(Xu,Yu) ->
                 (
-                    % bagof(GC,aStarOpenList(X,Y,GC),List),
-                    % min(List,Gcost_old),
+
                     aStarClosedList(X,Y,Gcost_old,_,_),
                     not(aStarClosedList(Xu,Yu,_,_,_)) ->
                     (
@@ -559,8 +616,7 @@ addNeighbourhood(X,Y,N,P) :-
                 % There is no human and valid then it is an empty cell, then it is move, cost 2
                 (not(h(Xu,Yu))) ->
                 (
-                    % bagof(GC,aStarOpenList(X,Y,GC),List),
-                    % min(List,Gcost_old),
+
                     aStarClosedList(X,Y,Gcost_old,_,_),
                     not(aStarClosedList(Xu,Yu,_,_,_)) ->
                     (
@@ -570,16 +626,12 @@ addNeighbourhood(X,Y,N,P) :-
                         asserta(aStarOpenList(Xu,Yu,Gcost_new,X,Y))
                     )
                 )
-                % It is possible to make long pass, then its cost = 1
-                % long_pass
-                % ();
                 ;
                 % It is Touchdown -> then there is heuristic cost with negative value of Euclidian distance to work as lower bound for the cost which will enable us to get an optimal solution
                 % , otherwise the heuristic cost is zero as in the above predicates
                 (t(Xu,Yu)) ->
                 (
-                    % bagof(GC,aStarOpenList(X,Y,GC),List),
-                    % min(List,Gcost_old),
+
                     aStarClosedList(X,Y,Gcost_old,_,_),
                     not(aStarClosedList(Xu,Yu,_, _, _)) ->
                     (
@@ -597,19 +649,18 @@ addNeighbourhood(X,Y,N,P) :-
             (
                 aStarOpenList(Xu,Yu,C,X,Y),
                 asserta(aStarClosedList(Xu,Yu,C,X,Y)),
-                addNeighbourhood(Xu,Yu,Nnew,[Xu,Yu|P]),
+                addNeighbourhood(Xu,Yu,Nnew,[Xu,Yu,m|P]),
                 retract(aStarClosedList(Xu,Yu,C,X,Y))
             )
         );
-        nextDown(X,Y,Xd,Yd,Vd,P),
+        nextDown(X,Y,Xd,Yd,Vd,[u|P]),
         ((Vd == 1) ->
             format('\nAdd down to ~d ~d in Open List', [Xd, Yd]),
             (
                 % There is a human, then it is a handover with cost 1
                 h(Xd,Yd) ->
                 (
-                    % bagof(GC,aStarOpenList(X,Y,GC),List),
-                    % min(List,Gcost_old),
+
                     aStarClosedList(X,Y,Gcost_old,_,_),
                     not(aStarClosedList(Xd,Yd,_,_,_)) ->
                     (
@@ -621,8 +672,7 @@ addNeighbourhood(X,Y,N,P) :-
                 );
                 (not(h(Xd,Yd))) ->
                 (
-                    % bagof(GC,aStarOpenList(X,Y,GC),List),
-                    % min(List,Gcost_old),
+
                     aStarClosedList(X,Y,Gcost_old,_,_),
                     not(aStarClosedList(Xd,Yd,_,_,_)) ->
                     (
@@ -632,12 +682,11 @@ addNeighbourhood(X,Y,N,P) :-
                         asserta(aStarOpenList(Xd,Yd,Gcost_new,X,Y))
                     )
                 )
-                % long_pass
+                
                 ;
                 (t(Xd,Yd)) ->
                 (
-                    % bagof(GC,aStarOpenList(X,Y,GC),List),
-                    % min(List,Gcost_old),
+
                     aStarClosedList(X,Y,Gcost_old,_,_),
                     not(aStarClosedList(Xd,Yd,_,_,_)) ->
                     (
@@ -655,12 +704,12 @@ addNeighbourhood(X,Y,N,P) :-
             (   
                 aStarOpenList(Xd,Yd,C,X,Y),
                 asserta(aStarClosedList(Xd,Yd,C,X,Y)),
-                addNeighbourhood(Xd,Yd,Nnew,[Xd,Yd|P]),
+                addNeighbourhood(Xd,Yd,Nnew,[Xd,Yd,m|P]),
                 retract(aStarClosedList(Xd,Yd,C,X,Y))
 
             )
         );
-        nextRight(X,Y,Xr,Yr,Vr,P),
+        nextRight(X,Y,Xr,Yr,Vr,[u|P]),
         ((Vr == 1) ->
             format('\nAdd Right to ~d ~d in Open List', [Xr, Yr]),
             (
@@ -668,8 +717,7 @@ addNeighbourhood(X,Y,N,P) :-
                 % There is a human, then it is a handover with cost 1
                 h(Xr,Yr) ->
                 (   
-                    % bagof(GC,aStarOpenList(X,Y,GC),List),
-                    % min(List,Gcost_old),
+
                     aStarClosedList(X,Y,Gcost_old,_,_),
                     not(aStarClosedList(Xr,Yr,_,_,_)) ->
                     (
@@ -681,8 +729,7 @@ addNeighbourhood(X,Y,N,P) :-
                 );
                 (not(h(Xr,Yr))) ->
                 (
-                    % bagof(GC,aStarOpenList(X,Y,GC),List),
-                    % min(List,Gcost_old),
+
                     aStarClosedList(X,Y,Gcost_old,_,_),
                     not(aStarClosedList(Xr,Yr,_,_,_)) ->
                     (
@@ -692,12 +739,11 @@ addNeighbourhood(X,Y,N,P) :-
                         asserta(aStarOpenList(Xr,Yr,Gcost_new,X,Y))
                     )
                 )
-                % long_pass
+                
                 ;
                 (t(Xr,Yr)) ->
                 (
-                    % bagof(GC,aStarOpenList(X,Y,GC),List),
-                    % min(List,Gcost_old),
+
                     aStarClosedList(X,Y,Gcost_old,_,_),
                     not(aStarClosedList(Xr,Yr,_,_,_)) ->
                     (
@@ -714,12 +760,12 @@ addNeighbourhood(X,Y,N,P) :-
             (
                 aStarOpenList(Xr,Yr,C,X,Y),
                 asserta(aStarClosedList(Xr,Yr,C,X,Y)),
-                addNeighbourhood(Xr,Yr,Nnew,[Xr,Yr|P]),
+                addNeighbourhood(Xr,Yr,Nnew,[Xr,Yr,m|P]),
                 retract(aStarClosedList(Xr,Yr,C,X,Y))
 
             )
         );
-        nextLeft(X,Y,Xl,Yl,Vl,P),
+        nextLeft(X,Y,Xl,Yl,Vl,[u|P]),
         ((Vl == 1) ->
             format('\nAdd Left to ~d ~d in Open List', [Xl, Yl]),
             (
@@ -727,8 +773,7 @@ addNeighbourhood(X,Y,N,P) :-
                 % There is a human, then it is a handover with cost 1
                 h(Xl,Yl) ->
                 (
-                    % bagof(GC,aStarOpenList(X,Y,GC),List),
-                    % min(List,Gcost_old),
+
                     aStarClosedList(X,Y,Gcost_old,_,_),
                     not(aStarClosedList(Xl,Yl,_,_,_)) ->
                     (
@@ -739,8 +784,7 @@ addNeighbourhood(X,Y,N,P) :-
                 );
                 (not(h(Xl,Yl))) ->
                 (
-                    % bagof(GC,aStarOpenList(X,Y,GC),List),
-                    % min(List,Gcost_old),
+
                     aStarClosedList(X,Y,Gcost_old,_,_),
                     not(aStarClosedList(Xl,Yl,_,_,_)) ->
                     (
@@ -749,12 +793,11 @@ addNeighbourhood(X,Y,N,P) :-
                         asserta(aStarOpenList(Xl,Yl,Gcost_new,X,Y))
                     )
                 )
-                % long_pass
+                
                 ;
                 (t(Xl,Yl)) ->
                 (
-                    % bagof(GC,aStarOpenList(X,Y,GC),List),
-                    % min(List,Gcost_old),
+
                     aStarClosedList(X,Y,Gcost_old,_,_),
                     not(aStarClosedList(Xl,Yl,_,_,_)) ->
                     (
@@ -770,7 +813,7 @@ addNeighbourhood(X,Y,N,P) :-
             (
                 aStarOpenList(Xl,Yl,C,X,Y),
                 asserta(aStarClosedList(Xl,Yl,C,X,Y)),
-                addNeighbourhood(Xl,Yl,Nnew,[Xl,Yl|P]),
+                addNeighbourhood(Xl,Yl,Nnew,[Xl,Yl,u|P]),
                 retract(aStarClosedList(Xl,Yl,C,X,Y))
 
             )
@@ -803,28 +846,15 @@ newList([[X,Y,V,Xp,Yp]|T]) :-
     );
     newList(T).
 
-% getMinOpenList([]) :- !.
-% getMinOpenList(V,Vnew,[[_,_,Vi]|T]) :- (Vi < V) -> Vnew is Vi, V is Vi, getMinOpenList(V,Vnewnew).
-
 selectMinNode(Xn,Yn) :-
     getOpenList(List),
-    % format('\n -------------------------- Open List ---------------------------\n'),
-    % printOpenList(List),
-    % format('\n -----------------------------------------------------\n'),
-    % getClosedList(CList),
-    % format('\n -------------------------- Closed List ---------------------------\n'),
-    % printClosedList(CList),
-    % format('\n -----------------------------------------------------\n'),
     retractall(minOpenList(_)),
     asserta(minOpenList(50000)),
     newList(List),
     minOpenList(C),
     format('\n final minimum cost ~d', C),
     aStarOpenList(Xn,Yn,C,_,_),
-    inPath(Xn,Yn,P,R).
-
-
-
+    inPath(Xn,Yn,u,P,R).
 
 getPath(P,X,Y) :-
     aStarClosedList(X,Y,_,Xp,Yp),
@@ -832,10 +862,8 @@ getPath(P,X,Y) :-
     asserta(aStarShortestPath(Xp,Yp)),
     mapStart(Xs,Ys),
     not((X == Xs, Y == Ys)) ->
-        getPath([X,Y|P],Xp,Yp),
+        getPath([X,Y,Ty|P],Xp,Yp),
     true.
-
-
 
 aStarSearch(X,Y,NStepsAhead,P) :-
     aStarOpenList(X,Y,V,Xp,Yp), 
@@ -857,7 +885,7 @@ aStarSearch(X,Y,NStepsAhead,P) :-
     (
         retractall(aStarOpenList(Xt,Yt,_,_,_)),
         asserta(aStarClosedList(Xt,Yt,Vt,X,Y)),
-        Pp = [Xt,Yt|P],
+        Pp = [Xt,Yt,u|P],
         format('\n ---------- Nodes that has been visited -----------\n'),
         printlst(Pp),
         format('\n ----------- Shortest Path ------------\n'),
@@ -871,7 +899,7 @@ aStarSearch(X,Y,NStepsAhead,P) :-
     addNeighbourhood(X,Y,0,[X,Y|P]);
     selectMinNode(Xnew, Ynew),
     format('\n\n------------------ Selected (~d,~d) -------------------------\n\n', [Xnew, Ynew]),
-    aStarSearch(Xnew,Ynew, NStepsAhead, [X,Y|P]).
+    aStarSearch(Xnew,Ynew, NStepsAhead, [X,Y,u|P]).
 
 
 % --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -889,14 +917,15 @@ mainBacktrack :-
     initMain
     ,s(Xs,Ys)
     ,get_time(T1)    
-    ,backtrackSearch(Xs,Ys,[])
-    ,format('\n--------------------------------------------------------------\n--------------------------------------------------------------\n--------------------------------------------------------------\n')
+    ,(backtrackSearch(Xs,Ys,[]);true)
+    -> (format('\n--------------------------------------------------------------\n--------------------------------------------------------------\n--------------------------------------------------------------\n')
     ,format('\n\tCurrent Optimal Paths\t\n')
     ,optimalPath(P)
     ,printlst(P)
     ,format('\n--------------------------------------------------------------\n--------------------------------------------------------------\n--------------------------------------------------------------\n')
     ,get_time(T2)
-    ,format(' \nTime elapsed: ~f msec', [(T2-T1)*1000])
+    , T3 = T2 - T1
+    ,format(' \nTime elapsed: ~f msec', [(T3)*1000]))
     . 
 
 mainRandomSearch :-
@@ -907,17 +936,19 @@ mainRandomSearch :-
     ,randomSearch(Xs,Ys,NRS_episodes, [])
     ,rsStatistics
     ,get_time(T2)
-    ,format(' \nTime elapsed: ~f msec', [(T2-T1)*1000])
+    , T3 = T2 - T1
+    ,format(' \nTime elapsed: ~f msec', [(T3)*1000])
     .  
 
 
-mainAStartSearch :-
+mainAStarSearch :-
     initMain
     ,mapStart(Xs,Ys)
     ,param(S_ahead, numStepsAhead)
     ,param(N,mapSize)
     ,asserta(aStarOpenList(Xs,Ys,0,Xs,Ys))
-    ,aStarSearch(Xs,Ys,S_ahead, []);
+    ,get_time(T1)
+    ,(aStarSearch(Xs,Ys,S_ahead, []);true)->
     (
         mapTouchDown(Xt,Yt),
         format('\n ----------- Shortest Path ------------\n'),
@@ -926,5 +957,8 @@ mainAStartSearch :-
         printShortestPathList(P),
         % getPath(P,Xt,Yt),
         format('\n----------------------------\n')
+        ,get_time(T2)
+        , T3 = T2 - T1
+        ,format(' \nTime elapsed: ~f',[T3*1000])
     )
     .  
