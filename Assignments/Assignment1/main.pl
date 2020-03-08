@@ -30,7 +30,7 @@
 % --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 param(5,mapSize).
 param(10,maxStepsRS).
-param(10, numEpisodesRS).
+param(1, numIterationsRS).
 param(1, numStepsAhead).
 % --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 :- dynamic mapBoarders/2.
@@ -48,6 +48,8 @@ param(1, numStepsAhead).
 
 
 :- dynamic minOpenList/1.
+
+:- dynamic aStarShortestPath/2.
 
 % --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -212,6 +214,176 @@ nextLeft(X,Y,Xl,Yl,V,P) :-
 pass(X,Y) :-
     true.
 
+
+passU(X,Y,Xu,Yu,V,P) :-
+    succ(Y, Ynew), Xu is X,
+    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+    (
+        valid(X,Ynew,Vv,P),
+        (
+            ((Vv == 0), h(X,Ynew)) -> 
+            (
+                format('\n Found Human'),
+                Yu is Ynew, V is 1
+            );
+            ((Vv == 0), not(h(X,Ynew))) -> 
+            (
+                format('\n Valid cell but did not find human, searching forward'),
+                passU(Xu,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu
+            );
+            format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
+            Yu is Y, V is 0
+        )
+    ).
+
+passD(X,Y,Xu,Yu,V,P) :-
+    succ(Ynew, Y), Xu is X,
+    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+    (
+        valid(X,Ynew,Vv,P),
+        (
+            ((Vv == 0), h(X,Ynew)) -> 
+            (
+                format('\n Found Human'),
+                Yu is Ynew, V is 1
+            );
+            ((Vv == 0), not(h(X,Ynew))) -> 
+            (
+                format('\n Valid cell but did not find human, searching forward'),
+                passU(Xu,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu
+            );
+            format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
+            Yu is Y, V is 0
+        )
+    ).
+
+passR(X,Y,Xu,Yu,V,P) :-
+    succ(Y, Ynew), Xu is X,
+    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+    (
+        valid(X,Ynew,Vv,P),
+        (
+            ((Vv == 0), h(X,Ynew)) -> 
+            (
+                format('\n Found Human'),
+                Yu is Ynew, V is 1
+            );
+            ((Vv == 0), not(h(X,Ynew))) -> 
+            (
+                format('\n Valid cell but did not find human, searching forward'),
+                passU(Xu,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu
+            );
+            format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
+            Yu is Y, V is 0
+        )
+    ).
+
+passL(X,Y,Xu,Yu,V,P) :-
+    succ(Y, Ynew), Xu is X,
+    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+    (
+        valid(X,Ynew,Vv,P),
+        (
+            ((Vv == 0), h(X,Ynew)) -> 
+            (
+                format('\n Found Human'),
+                Yu is Ynew, V is 1
+            );
+            ((Vv == 0), not(h(X,Ynew))) -> 
+            (
+                format('\n Valid cell but did not find human, searching forward'),
+                passU(Xu,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu
+            );
+            format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
+            Yu is Y, V is 0
+        )
+    ).
+
+passUR(X,Y,Xu,Yu,V,P) :-
+    succ(Y, Ynew), Xu is X,
+    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+    (
+        valid(X,Ynew,Vv,P),
+        (
+            ((Vv == 0), h(X,Ynew)) -> 
+            (
+                format('\n Found Human'),
+                Yu is Ynew, V is 1
+            );
+            ((Vv == 0), not(h(X,Ynew))) -> 
+            (
+                format('\n Valid cell but did not find human, searching forward'),
+                passU(Xu,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu
+            );
+            format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
+            Yu is Y, V is 0
+        )
+    ).
+
+passUL(X,Y,Xu,Yu,V,P) :-
+    succ(Y, Ynew), Xu is X,
+    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+    (
+        valid(X,Ynew,Vv,P),
+        (
+            ((Vv == 0), h(X,Ynew)) -> 
+            (
+                format('\n Found Human'),
+                Yu is Ynew, V is 1
+            );
+            ((Vv == 0), not(h(X,Ynew))) -> 
+            (
+                format('\n Valid cell but did not find human, searching forward'),
+                passU(Xu,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu
+            );
+            format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
+            Yu is Y, V is 0
+        )
+    ).
+
+passDR(X,Y,Xu,Yu,V,P) :-
+    succ(Y, Ynew), Xu is X,
+    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+    (
+        valid(X,Ynew,Vv,P),
+        (
+            ((Vv == 0), h(X,Ynew)) -> 
+            (
+                format('\n Found Human'),
+                Yu is Ynew, V is 1
+            );
+            ((Vv == 0), not(h(X,Ynew))) -> 
+            (
+                format('\n Valid cell but did not find human, searching forward'),
+                passU(Xu,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu
+            );
+            format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
+            Yu is Y, V is 0
+        )
+    ).
+passDL(X,Y,Xu,Yu,V,P) :-
+    succ(Y, Ynew), Xu is X,
+    format('Current cell is (~d,~d), Searching on (~d,~d)', [X,Y,Xu,Ynew]),
+    (
+        valid(X,Ynew,Vv,P),
+        (
+            ((Vv == 0), h(X,Ynew)) -> 
+            (
+                format('\n Found Human'),
+                Yu is Ynew, V is 1
+            );
+            ((Vv == 0), not(h(X,Ynew))) -> 
+            (
+                format('\n Valid cell but did not find human, searching forward'),
+                passU(Xu,Ynew,Xuu,Yuu,Vu,P),Yu is Yuu
+            );
+            format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
+            Yu is Y, V is 0
+        )
+    ).
+
+
+
 % passU(X,Y,Xu,Yu) :-
     % validation,
     % pass to the human on that line,
@@ -280,7 +452,7 @@ randomSearch(_,_,0,P) :-
     ,!.
 
 randomSearch(X,Y,N,P) :-
-    param(M,numEpisodesRS),
+    param(M,numIterationsRS),
     format('\n\t########## Random Search iteration #~d ##########\t\n', [M-N+1]),
     randomSearch(X,Y,[]),
     succ(Nnew, N),
@@ -360,13 +532,16 @@ randomSearch(X,Y,P) :-
 
 rsStatistics :-
     rscounter(N),
-    param(Nall, numEpisodesRS),
+    param(Nall, numIterationsRS),
     format('\n##########################################################\n\t##### Random Search Statistics ##### \n \t ~d/~d trials successfully reached the target\n##########################################################', [N,Nall]).
 
 
 % --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 addNeighbourhood(X,Y,N,P) :-
 (
+    succ(N,Ntmp),
+    param(NL, numStepsAhead),
+    format('\n Adding Neighbours of (~d,~d) as step ahead ~d/~d', [X,Y,Ntmp,NL]),
     (
         nextUp(X,Y,Xu,Yu,Vu,P),
         ((Vu == 1) ->
@@ -382,7 +557,7 @@ addNeighbourhood(X,Y,N,P) :-
                     not(aStarClosedList(Xu,Yu,_,_,_)) ->
                     (
                         Gcost_new is Gcost_old +1,
-                        format(" with cost ~d",[Gcost_new]),
+                        format(' with cost ~d',[Gcost_new]),
                         asserta(aStarOpenList(Xu,Yu,Gcost_new,X,Y)) 
                     )
                 );
@@ -396,7 +571,7 @@ addNeighbourhood(X,Y,N,P) :-
                     (
                         Gcost_new is Gcost_old +2,
                         
-                        format(" with cost ~d",[Gcost_new]),
+                        format(' with cost ~d',[Gcost_new]),
                         asserta(aStarOpenList(Xu,Yu,Gcost_new,X,Y))
                     )
                 )
@@ -415,7 +590,7 @@ addNeighbourhood(X,Y,N,P) :-
                     (
                         Gcost_new is Gcost_old - 1,
                         
-                        format(" with cost ~d",[Gcost_new]),
+                        format(' with cost ~d',[Gcost_new]),
                         asserta(aStarOpenList(Xu,Yu,Gcost_new,X,Y))
                     )
                 )
@@ -425,7 +600,10 @@ addNeighbourhood(X,Y,N,P) :-
             succ(N,Nnew),
             (Nnew < NStepsAhead) ->
             (
-                addNeighbourhood(Xu,Yu,Nnew,[Xu,Yu|P])
+                aStarOpenList(Xu,Yu,C,X,Y),
+                asserta(aStarClosedList(Xu,Yu,C,X,Y)),
+                addNeighbourhood(Xu,Yu,Nnew,[Xu,Yu|P]),
+                retract(aStarClosedList(Xu,Yu,C,X,Y))
             )
         );
         nextDown(X,Y,Xd,Yd,Vd,P),
@@ -442,7 +620,7 @@ addNeighbourhood(X,Y,N,P) :-
                     (
                         Gcost_new is Gcost_old +1,
                         
-                        format(" with cost ~d",[Gcost_new]),
+                        format(' with cost ~d',[Gcost_new]),
                         asserta(aStarOpenList(Xd,Yd,Gcost_new,X,Y))
                     )
                 );
@@ -455,7 +633,7 @@ addNeighbourhood(X,Y,N,P) :-
                     (
                         Gcost_new is Gcost_old +2,
                         
-                        format(" with cost ~d",[Gcost_new]),
+                        format(' with cost ~d',[Gcost_new]),
                         asserta(aStarOpenList(Xd,Yd,Gcost_new,X,Y))
                     )
                 )
@@ -470,7 +648,7 @@ addNeighbourhood(X,Y,N,P) :-
                     (
                         Gcost_new is Gcost_old - 1,
                         
-                        format(" with cost ~d",[Gcost_new]),
+                        format(' with cost ~d',[Gcost_new]),
                         asserta(aStarOpenList(Xd,Yd,Gcost_new,X,Y))   
                     )
                 )
@@ -479,8 +657,12 @@ addNeighbourhood(X,Y,N,P) :-
             param(NStepsAhead, numStepsAhead),
             succ(N,Nnew),
             (Nnew < NStepsAhead) ->
-            (
-                addNeighbourhood(Xd,Yd,Nnew,[Xd,Yd|P])
+            (   
+                aStarOpenList(Xd,Yd,C,X,Y),
+                asserta(aStarClosedList(Xd,Yd,C,X,Y)),
+                addNeighbourhood(Xd,Yd,Nnew,[Xd,Yd|P]),
+                retract(aStarClosedList(Xd,Yd,C,X,Y))
+
             )
         );
         nextRight(X,Y,Xr,Yr,Vr,P),
@@ -498,7 +680,7 @@ addNeighbourhood(X,Y,N,P) :-
                     (
                         Gcost_new is Gcost_old +1,
                         
-                        format(" with cost ~d",[Gcost_new]),
+                        format(' with cost ~d',[Gcost_new]),
                         asserta(aStarOpenList(Xr,Yr,Gcost_new,X,Y)) 
                     )
                 );
@@ -511,7 +693,7 @@ addNeighbourhood(X,Y,N,P) :-
                     (
                         Gcost_new is Gcost_old +2,
                         
-                        format(" with cost ~d",[Gcost_new]),
+                        format(' with cost ~d',[Gcost_new]),
                         asserta(aStarOpenList(Xr,Yr,Gcost_new,X,Y))
                     )
                 )
@@ -526,7 +708,7 @@ addNeighbourhood(X,Y,N,P) :-
                     (
                         Gcost_new is Gcost_old - 1,
                         
-                        format(" with cost ~d",[Gcost_new]),
+                        format(' with cost ~d',[Gcost_new]),
                         asserta(aStarOpenList(Xr,Yr,Gcost_new,X,Y))
                     )
                 )
@@ -535,7 +717,11 @@ addNeighbourhood(X,Y,N,P) :-
             succ(N,Nnew),
             (Nnew < NStepsAhead) ->
             (
-                addNeighbourhood(Xr,Yr,Nnew,[Xr,Yr|P])
+                aStarOpenList(Xr,Yr,C,X,Y),
+                asserta(aStarClosedList(Xr,Yr,C,X,Y)),
+                addNeighbourhood(Xr,Yr,Nnew,[Xr,Yr|P]),
+                retract(aStarClosedList(Xr,Yr,C,X,Y))
+
             )
         );
         nextLeft(X,Y,Xl,Yl,Vl,P),
@@ -552,7 +738,7 @@ addNeighbourhood(X,Y,N,P) :-
                     not(aStarClosedList(Xl,Yl,_,_,_)) ->
                     (
                         Gcost_new is Gcost_old +1,
-                        format(" with cost ~d",[Gcost_new]),
+                        format(' with cost ~d',[Gcost_new]),
                         asserta(aStarOpenList(Xl,Yl,Gcost_new,X,Y))
                     )
                 );
@@ -564,7 +750,7 @@ addNeighbourhood(X,Y,N,P) :-
                     not(aStarClosedList(Xl,Yl,_,_,_)) ->
                     (
                         Gcost_new is Gcost_old +2,
-                        format(" with cost ~d",[Gcost_new]),
+                        format(' with cost ~d',[Gcost_new]),
                         asserta(aStarOpenList(Xl,Yl,Gcost_new,X,Y))
                     )
                 )
@@ -578,7 +764,7 @@ addNeighbourhood(X,Y,N,P) :-
                     not(aStarClosedList(Xl,Yl,_,_,_)) ->
                     (
                         Gcost_new is Gcost_old - 1,
-                        format(" with cost ~d",[Gcost_new]),
+                        format(' with cost ~d',[Gcost_new]),
                         asserta(aStarOpenList(Xl,Yl,Gcost_new,X,Y))   
                     )
                 )
@@ -587,7 +773,11 @@ addNeighbourhood(X,Y,N,P) :-
             succ(N,Nnew),
             (Nnew < NStepsAhead) ->
             (
-                addNeighbourhood(Xl,Yl,Nnew,[Xl,Yl|P])
+                aStarOpenList(Xl,Yl,C,X,Y),
+                asserta(aStarClosedList(Xl,Yl,C,X,Y)),
+                addNeighbourhood(Xl,Yl,Nnew,[Xl,Yl|P]),
+                retract(aStarClosedList(Xl,Yl,C,X,Y))
+
             )
         )
     )
@@ -601,6 +791,10 @@ printOpenList([[X,Y,V,Xp,Yp]|T]) :- format('\n! X: ~d,Y: ~d,V: ~d   , Xp: ~d, Yp
 getClosedList(List) :- findall([X,Y,V,Xp,Yp], aStarClosedList(X,Y,V,Xp,Yp), List).
 printClosedList([]) :- !.
 printClosedList([[X,Y,V,Xp,Yp]|T]) :- format('\n! X: ~d,Y: ~d,V: ~d    , Xp: ~d, Yp:~d', [X,Y,V,Xp,Yp]),printClosedList(T).
+
+getShortestPathList(List) :- findall([X,Y], aStarShortestPath(X,Y), List).
+printShortestPathList([]) :- !.
+printShortestPathList([[X,Y]|T]) :- format('\n! X: ~d,Y: ~d', [X,Y]),printShortestPathList(T).
 
 
 newList([]) :- !.
@@ -636,11 +830,11 @@ selectMinNode(Xn,Yn) :-
 
 
 
-getPath(_,2,3) :- !.
 
 getPath(P,X,Y) :-
     aStarClosedList(X,Y,_,Xp,Yp),
     format(' (~d,~d)', [Xp,Yp]),
+    asserta(aStarShortestPath(Xp,Yp)),
     mapStart(Xs,Ys),
     not((X == Xs, Y == Ys)) ->
         getPath([X,Y|P],Xp,Yp),
@@ -673,9 +867,11 @@ aStarSearch(X,Y,NStepsAhead,P) :-
         printlst(Pp),
         format('\n ----------- Shortest Path ------------\n'),
         format(' (~d,~d)', [Xt,Yt]),
+        assert(aStarShortestPath(Xt,Yt)),
         getPath(P,Xt,Yt),
         format('\n----------------------------\n'),
         true
+        
     );
     addNeighbourhood(X,Y,0,[X,Y|P]);
     selectMinNode(Xnew, Ynew),
@@ -697,28 +893,43 @@ initMain :-
 mainBacktrack :-
     initMain
     ,s(Xs,Ys)
+    ,get_time(T1)    
     ,backtrackSearch(Xs,Ys,[])
     ,format('\n--------------------------------------------------------------\n--------------------------------------------------------------\n--------------------------------------------------------------\n')
     ,format('\n\tCurrent Optimal Paths\t\n')
     ,optimalPath(P)
     ,printlst(P)
     ,format('\n--------------------------------------------------------------\n--------------------------------------------------------------\n--------------------------------------------------------------\n')
+    ,get_time(T2)
+    ,format(' \nTime elapsed: ~f msec', [(T2-T1)*1000])
     . 
 
 mainRandomSearch :-
     initMain
     ,s(Xs,Ys)
-    ,param(NRS_episodes, numEpisodesRS)
+    ,param(NRS_episodes, numIterationsRS)
+    ,get_time(T1)
     ,randomSearch(Xs,Ys,NRS_episodes, [])
     ,rsStatistics
+    ,get_time(T2)
+    ,format(' \nTime elapsed: ~f msec', [(T2-T1)*1000])
     .  
 
 
 mainAStartSearch :-
     initMain
-    ,s(Xs,Ys)
+    ,mapStart(Xs,Ys)
     ,param(S_ahead, numStepsAhead)
     ,param(N,mapSize)
-    ,asserta(aStarOpenList(2,3,0,2,3))
-    ,aStarSearch(Xs,Ys,S_ahead, [])
+    ,asserta(aStarOpenList(Xs,Ys,0,Xs,Ys))
+    ,aStarSearch(Xs,Ys,S_ahead, []);
+    (
+        mapTouchDown(Xt,Yt),
+        format('\n ----------- Shortest Path ------------\n'),
+        format(' (~d,~d)', [Xt,Yt]),
+        getShortestPathList(P),
+        printShortestPathList(P),
+        % getPath(P,Xt,Yt),
+        format('\n----------------------------\n')
+    )
     .  
