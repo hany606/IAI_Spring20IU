@@ -129,7 +129,7 @@ reached(X,Y) :-
 
 
 % --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-move(X,Y,P,N) :-
+actBackTrack(X,Y,P,N) :-
 (
     format('\n ----Step---- ~d', [N]),
     format('\n#Current in ~d ~d and deciding, Check Up', [X,Y]),
@@ -159,7 +159,9 @@ move(X,Y,P,N) :-
         Nnew is N +1,
         format('\nLeft to ~d ~d in step ~d', [Xl, Yl, Nnew]),
         backtrackSearch(Xl,Yl, [Xl,Yl,m|P])
-    )
+    );
+    pass(X,Y,[X,Y,p|P],N)
+
 ). 
 
 nextUp(X,Y,Xu,Yu,V,P) :-
@@ -188,7 +190,7 @@ nextRight(X,Y,Xr,Yr,V,P) :-
     succ(X, Xnew), Yr is Y,
     (
         valid(Xnew,Y,m,Vv,P)->
-        (Vv == 0) -> (format('Fuck too'), Xr is Xnew, V is 0);
+        (Vv == 0) -> ( Xr is Xnew, V is 0);
         (Vv > 0) -> (Xr is X, V is Vv)
     )
 ).
@@ -209,56 +211,64 @@ pass(X,Y,P,N) :-
     format('\n#Current in ~d ~d and deciding, Check Passing Up', [X,Y]),
     passU(X,Y,Xu,Yu,Vu,P),
     ((Vu == 0) ->
-        incrpasscounter,
+        succ(X,XT),succ(Y,YT),
+        ((Yu > YT) -> (incrpasscounter);true),
         format('\nPass Up to ~d ~d in step ~d (Number of steps did not change)', [Xu, Yu, N]),
         backtrackSearch(Xu,Yu, [Xu,Yu,p|P])
     );
     format('\n#Current in ~d ~d and deciding, Check Passing Down', [X,Y]),
     passD(X,Y,Xd,Yd,Vd,P),
     ((Vd == 0) ->
-        incrpasscounter,
+        succ(YT,Y), % Long pass detection
+        ((Yd < YT) -> (incrpasscounter);true),
         format('\nPass Down to ~d ~d in step ~d (Number of steps did not change)', [Xd, Yd, N]),
         backtrackSearch(Xd,Yd, [Xd,Yd,p|P])
     );
     format('\n#Current in ~d ~d and deciding, Check Passing Right', [X,Y]),
     passR(X,Y,Xr,Yr,Vr,P),
     ((Vr == 0) ->
-        incrpasscounter,
+        succ(X,XT),
+        ((Xr > XT) -> (incrpasscounter);true),
         format('\nPass Right to ~d ~d in step ~d (Number of steps did not change)', [Xr, Yr, N]),
         backtrackSearch(Xr,Yr, [Xr,Yr,p|P])
     );
     format('\n#Current in ~d ~d and deciding, Check Passing Left', [X,Y]),
     passL(X,Y,Xl,Yl,Vl,P),
     ((Vl == 0) ->
-        incrpasscounter,
+        succ(XT,X),
+        ((Xl < XT) -> (incrpasscounter);true),
         format('\nPass Left to ~d ~d in step ~d (Number of steps did not change)', [Xl, Yl, N]),
         backtrackSearch(Xl,Yl, [Xl,Yl,p|P])
     );
     format('\n#Current in ~d ~d and deciding, Check Passing Up Right (Diagonal)', [X,Y]),
     passUR(X,Y,Xur,Yur,Vur,P),
     ((Vur == 0) ->
-        incrpasscounter,
+        succ(X,XT),succ(Y,YT),
+        ((Yur > YT, Xur > XT) -> (incrpasscounter);true),
         format('\nPass Up to ~d ~d in step ~d (Number of steps did not change)', [Xur, Yur, N]),
         backtrackSearch(Xur,Yur, [Xur,Yur,p|P])
     );
     format('\n#Current in ~d ~d and deciding, Check Passing Up Left (Diagonal)', [X,Y]),
     passUL(X,Y,Xul,Yul,Vul,P),
     ((Vul == 0) ->
-        incrpasscounter,
+        succ(XT,X),succ(Y,YT),
+        ((Yul > YT, Xul < XT) -> (incrpasscounter);true),
         format('\nPass Up to ~d ~d in step ~d (Number of steps did not change)', [Xul, Yul, N]),
         backtrackSearch(Xul,Yul, [Xul,Yul,p|P])
     );
     format('\n#Current in ~d ~d and deciding, Check Passing Down Right (Diagonal)', [X,Y]),
     passDR(X,Y,Xdr,Ydr,Vdr,P),
     ((Vdr == 0) ->
-        incrpasscounter,
+        succ(X,XT),succ(YT,Y),
+        ((Ydr < YT, Xdr > XT) -> (incrpasscounter);true),
         format('\nPass Down to ~d ~d in step ~d (Number of steps did not change)', [Xdr, Ydr, N]),
         backtrackSearch(Xdr,Ydr, [Xdr,Ydr,p|P])
     );
     format('\n#Current in ~d ~d and deciding, Check Passing Down Left (Diagonal)', [X,Y]),
     passDL(X,Y,Xdl,Ydl,Vdl,P),
     ((Vdl == 0) ->
-        incrpasscounter,
+        succ(XT,X),succ(YT,Y),
+        ((Ydl < YT, Xdl < XT) -> (incrpasscounter);true),
         format('\nPass Down to ~d ~d in step ~d (Number of steps did not change)', [Xdl, Ydl, N]),
         backtrackSearch(Xdl,Ydl, [Xdl,Ydl,p|P])
     )
@@ -267,7 +277,6 @@ pass(X,Y,P,N) :-
 
 validPass :-
     (passcounter(C),
-    format('##\nFuck~d',C),
     (C == 0),
     format('\nValid Pass if applicable; not execeeding the number of the valid passes during the gameplay'));
     (C > 0) -> (format('\n Not Valid Pass\n'), false).
@@ -486,7 +495,7 @@ backtrackSearch(X,Y,P) :-
             not(isOptimalPath(N)) -> (
                 format('\n \t XXXXXXXXXX Not optimal path, discarded XXXXXXXXXX \n Reason: Number of current steps: ~d',[N])
             );
-            (move(X,Y,[X,Y,m|P],N), pass(X,Y,[X,Y,p|P],N))
+            (actBackTrack(X,Y,[X,Y,m|P],N))
         )
     )    
 ).
@@ -590,7 +599,7 @@ addNeighbourhood(X,Y,N,P) :-
     format('\n Adding Neighbours of (~d,~d) as step ahead ~d/~d', [X,Y,Ntmp,NL]),
     (
         nextUp(X,Y,Xu,Yu,Vu,[u|P]),
-        (format('Fuck ~d\n',Vu),
+        (
             (Vu == 0) -> (
             format('\nAdd Up to ~d ~d in Open List', [Xu, Yu]),
             (
@@ -705,7 +714,7 @@ addNeighbourhood(X,Y,N,P) :-
             )
         );
         nextRight(X,Y,Xr,Yr,Vr,[u|P]),
-        ((Vr == 0) -> ( format('Fuck ~d', Vr),
+        ((Vr == 0) -> (
             format('\nAdd Right to ~d ~d in Open List', [Xr, Yr]),
             (
                 
