@@ -29,13 +29,11 @@
 */
 % --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 param(5,mapSize).
-param(50,maxStepsRS).
-param(10, numEpisodesRS).
+param(15,maxStepsRS).
+param(1, numEpisodesRS).
 param(1, numStepsAhead).
 % --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 :- dynamic mapBoarders/2.
-:- dynamic mapOrcs/2.
-:- dynamic mapHumans/2.
 :- dynamic mapTouchDown/2.
 :- dynamic mapStart/2.
 % --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -58,8 +56,6 @@ param(1, numStepsAhead).
 
 resetMap :-
     retractall(mapBoarders(_,_)),
-    retractall(mapHumans(_,_)),
-    retractall(mapOrcs(_,_)),
     retractall(mapTouchDown(_,_)),
     retractall(mapStart(_,_)).
     
@@ -85,10 +81,6 @@ initMap :-
     param(Z,mapSize),
     succ(Z, Znew),
     initBoarders(Znew),
-    o(Xo,Yo),
-    asserta(mapOrcs(Xo,Yo)),
-    h(Xh,Yh),
-    asserta(mapHumans(Xh,Yh)),
     t(Xt,Yt),
     asserta(mapTouchDown(Xt,Yt)),
     s(Xs,Ys),
@@ -111,22 +103,22 @@ inPath(X,Y,T,P,R) :-
 
 valid(X,Y,T,V,P) :-
 (
-    (mapBoarders(X,Y)) ->
+    ((mapBoarders(X,Y)) ->
     (
         succ(0,V),
         format('\n(~d, ~d) is a boarder cell', [X,Y])
-    );
-    (mapOrcs(X,Y)) ->
+    ));
+    ((o(X,Y)) ->
     (
         succ(1,V),
         format('\n(~d, ~d) is an Orc cell', [X,Y])
-    );
-    inPath(X,Y,T,P,R),
+    ));
+    (inPath(X,Y,T,P,R),
     (R == 1) ->
     (
         succ(2,V),
         format('\n(~d, ~d) is a visited cell', [X,Y])
-    );
+    ));
     succ(V,1)
     
 ).
@@ -142,28 +134,28 @@ move(X,Y,P,N) :-
     format('\n ----Step---- ~d', [N]),
     format('\n#Current in ~d ~d and deciding, Check Up', [X,Y]),
     nextUp(X,Y,Xu,Yu,Vu,P),
-    ((Vu == 1) ->
+    ((Vu == 0) ->
         Nnew is N +1,
         format('\nUp to ~d ~d in step ~d', [Xu, Yu, Nnew]),
         backtrackSearch(Xu,Yu, [Xu,Yu,m|P])
     );
     format('\n#Current in ~d ~d and deciding, Check Down', [X,Y]),
     nextDown(X,Y,Xd,Yd,Vd,P),
-    ((Vd == 1) ->
+    ((Vd == 0) ->
         Nnew is N +1,
         format('\nDown to ~d ~d in step ~d', [Xd, Yd, Nnew]),
         backtrackSearch(Xd,Yd, [Xd,Yd,m|P])
     );
     format('\n#Current in ~d ~d and deciding, Check Right', [X,Y]),
     nextRight(X,Y,Xr,Yr,Vr,P),
-    ((Vr == 1) ->
+    ((Vr == 0) ->
         Nnew is N +1,
         format('\nRight to ~d ~d in step ~d', [Xr, Yr, Nnew]),
         backtrackSearch(Xr,Yr, [Xr,Yr,m|P])
     );
     format('\n#Current in ~d ~d and deciding, Check Left', [X,Y]),
     nextLeft(X,Y,Xl,Yl,Vl,P),
-    ((Vl == 1) ->
+    ((Vl == 0) ->
         Nnew is N +1,
         format('\nLeft to ~d ~d in step ~d', [Xl, Yl, Nnew]),
         backtrackSearch(Xl,Yl, [Xl,Yl,m|P])
@@ -174,9 +166,9 @@ nextUp(X,Y,Xu,Yu,V,P) :-
 (
     succ(Y, Ynew), Xu is X,
     (
-        valid(X,Ynew,m,Vv,P),
-        (Vv == 0) -> Yu is Ynew, V is 1;
-        Yu is Y, V is 0
+        valid(X,Ynew,m,Vv,P)->
+        (Vv == 0) -> (Yu is Ynew, V is 0);
+        (Vv > 0) -> (Yu is Y, V is Vv)
     )
 ).
     
@@ -184,9 +176,9 @@ nextDown(X,Y,Xd,Yd,V,P) :-
 (
     succ(Ynew, Y), Xd is X,
     (
-        valid(X,Ynew,m,Vv,P),
-        (Vv == 0)  -> Yd is Ynew, V is 1; 
-        Yd is Y
+        valid(X,Ynew,m,Vv,P)->
+        (Vv == 0)  -> Yd is Ynew, V is 0; 
+        (Vv > 0) -> (Yd is Y, V is Vv)
     )
 ).
 
@@ -195,18 +187,18 @@ nextRight(X,Y,Xr,Yr,V,P) :-
 (
     succ(X, Xnew), Yr is Y,
     (
-        valid(Xnew,Y,m,Vv,P),
-        (Vv == 0) -> Xr is Xnew, V is 1;
-        Xr is X
+        valid(Xnew,Y,m,Vv,P)->
+        (Vv == 0) -> (format('Fuck too'), Xr is Xnew, V is 0);
+        (Vv > 0) -> (Xr is X, V is Vv)
     )
 ).
 nextLeft(X,Y,Xl,Yl,V,P) :-
 (
     succ(Xnew, X), Yl is Y,
     (
-        valid(Xnew,Y,m,Vv,P),
-        (Vv == 0) -> Xl is Xnew, V is 1; 
-        Xl is X
+        valid(Xnew,Y,m,Vv,P)->
+        (Vv == 0) -> Xl is Xnew, V is 0; 
+        (Vv > 0) -> (Xl is X, V is Vv)
     )
 ).
 
@@ -275,9 +267,10 @@ pass(X,Y,P,N) :-
 
 validPass :-
     (passcounter(C),
+    format('##\nFuck~d',C),
     (C == 0),
     format('\nValid Pass if applicable; not execeeding the number of the valid passes during the gameplay'));
-    (format('\n Not Valid Pass\n'), false).
+    (C > 0) -> (format('\n Not Valid Pass\n'), false).
 
 testPass :-
     passUR(1,1,X,Y,V,[]),
@@ -308,7 +301,7 @@ passU(X,Y,Xu,Yu,V,P) :-
             );
             format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
             Yu is Y, V is Vv
-    );V is 4.
+    );V is 4,Yu is Y, Xu is X.
 
 passD(X,Y,Xu,Yu,V,P) :-
     succ(Ynew, Y), Xu is X,
@@ -327,7 +320,7 @@ passD(X,Y,Xu,Yu,V,P) :-
             );
             format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
             Yu is Y, V is Vv
-    );V is 4.
+    );V is 4,Yu is Y, Xu is X.
 
 
 passR(X,Y,Xr,Yr,V,P) :-
@@ -347,7 +340,7 @@ passR(X,Y,Xr,Yr,V,P) :-
         );
         format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
         Xr is X, V is Vv
-    ); V is 4.
+    ); V is 4,Yu is Y, Xu is X.
 
 passL(X,Y,Xl,Yl,V,P) :-
     succ(Xnew,X), Yl is Y,
@@ -366,7 +359,7 @@ passL(X,Y,Xl,Yl,V,P) :-
         );
         format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
         Xl is X, V is Vv
-    ); V is 4.
+    ); V is 4,Yu is Y, Xu is X.
 
 passUR(X,Y,Xu,Yu,V,P) :-
     succ(Y, Ynew), succ(X, Xnew),
@@ -385,7 +378,7 @@ passUR(X,Y,Xu,Yu,V,P) :-
             );
             format('\n Validation Value: ~d \nNot applicable pass due to the false validation of the cell (Border or has orc)',Vv),
             Yu is Y, Xu is X, V is Vv
-    );V is 4.
+    );V is 4,Yu is Y, Xu is X.
 
 passUL(X,Y,Xu,Yu,V,P) :-
     succ(Y, Ynew), succ(Xnew, X),
@@ -404,7 +397,7 @@ passUL(X,Y,Xu,Yu,V,P) :-
             );
             format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
             Yu is Y, Xu is X, V is Vv
-    );V is 4.
+    );V is 4,Yu is Y, Xu is X.
 
 passDR(X,Y,Xu,Yu,V,P) :-
     succ(Ynew, Y), succ(X, Xnew),
@@ -423,7 +416,7 @@ passDR(X,Y,Xu,Yu,V,P) :-
             );
             format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
             Yu is Y, Xu is X, V is Vv
-    );V is 4.
+    );V is 4,Yu is Y, Xu is X.
 
 passDL(X,Y,Xu,Yu,V,P) :-
     succ(Ynew, Y), succ(Xnew, X),
@@ -442,7 +435,7 @@ passDL(X,Y,Xu,Yu,V,P) :-
             );
             format('\n Validation Value:~d Not applicable pass due to the false validation of the cell',Vv),
             Yu is Y, Xu is X, V is Vv
-    );V is 4.
+    );V is 4,Yu is Y, Xu is X.
 
 % --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -597,7 +590,8 @@ addNeighbourhood(X,Y,N,P) :-
     format('\n Adding Neighbours of (~d,~d) as step ahead ~d/~d', [X,Y,Ntmp,NL]),
     (
         nextUp(X,Y,Xu,Yu,Vu,[u|P]),
-        ((Vu == 1) ->
+        (format('Fuck ~d\n',Vu),
+            (Vu == 0) -> (
             format('\nAdd Up to ~d ~d in Open List', [Xu, Yu]),
             (
                 
@@ -642,19 +636,20 @@ addNeighbourhood(X,Y,N,P) :-
                     )
                 )
                 
-            ),
-            param(NStepsAhead, numStepsAhead),
-            succ(N,Nnew),
-            (Nnew < NStepsAhead) ->
-            (
-                aStarOpenList(Xu,Yu,C,X,Y),
-                asserta(aStarClosedList(Xu,Yu,C,X,Y)),
-                addNeighbourhood(Xu,Yu,Nnew,[Xu,Yu,m|P]),
-                retract(aStarClosedList(Xu,Yu,C,X,Y))
-            )
+            )),
+        param(NStepsAhead, numStepsAhead),
+        succ(N,Nnew),
+        (Nnew < NStepsAhead) ->
+        (
+            aStarOpenList(Xu,Yu,C,X,Y),
+            asserta(aStarClosedList(Xu,Yu,C,X,Y)),
+            addNeighbourhood(Xu,Yu,Nnew,[Xu,Yu,m|P]),
+            retract(aStarClosedList(Xu,Yu,C,X,Y))
+        )
+            
         );
         nextDown(X,Y,Xd,Yd,Vd,[u|P]),
-        ((Vd == 1) ->
+        ((Vd == 0) ->
             format('\nAdd down to ~d ~d in Open List', [Xd, Yd]),
             (
                 % There is a human, then it is a handover with cost 1
@@ -710,7 +705,7 @@ addNeighbourhood(X,Y,N,P) :-
             )
         );
         nextRight(X,Y,Xr,Yr,Vr,[u|P]),
-        ((Vr == 1) ->
+        ((Vr == 0) -> ( format('Fuck ~d', Vr),
             format('\nAdd Right to ~d ~d in Open List', [Xr, Yr]),
             (
                 
@@ -753,7 +748,7 @@ addNeighbourhood(X,Y,N,P) :-
                         asserta(aStarOpenList(Xr,Yr,Gcost_new,X,Y))
                     )
                 )
-            ),
+            )),
             param(NStepsAhead, numStepsAhead),
             succ(N,Nnew),
             (Nnew < NStepsAhead) ->
@@ -766,7 +761,7 @@ addNeighbourhood(X,Y,N,P) :-
             )
         );
         nextLeft(X,Y,Xl,Yl,Vl,[u|P]),
-        ((Vl == 1) ->
+        ((Vl == 0) ->
             format('\nAdd Left to ~d ~d in Open List', [Xl, Yl]),
             (
                 
@@ -817,6 +812,131 @@ addNeighbourhood(X,Y,N,P) :-
                 retract(aStarClosedList(Xl,Yl,C,X,Y))
 
             )
+        );
+        passUR(X,Y,Xur,Yur,Vur,[u|P]),
+        (
+            (Vur == 0) -> (
+            format('\nAdd Up Right to ~d ~d in Open List', [Xur, Yur]),
+            (
+                
+                % There is a human, then it is a handover with cost 1
+                h(Xur,Yur) ->
+                (
+
+                    aStarClosedList(X,Y,Gcost_old,_,_),
+                    not(aStarClosedList(Xur,Yur,_,_,_)) ->
+                    (
+                        Gcost_new is Gcost_old +1,
+                        format(' with cost ~d',[Gcost_new]),
+                        asserta(aStarOpenList(Xur,Yur,Gcost_new,X,Y)) 
+                    )
+                )
+                
+            )
+            ),
+            param(NStepsAhead, numStepsAhead),
+            succ(N,Nnew),
+            (Nnew < NStepsAhead) ->
+            (
+                aStarOpenList(Xur,Yur,C,X,Y),
+                asserta(aStarClosedList(Xur,Yur,C,X,Y)),
+                addNeighbourhood(Xur,Yur,Nnew,[Xur,Yur,m|P]),
+                retract(aStarClosedList(Xur,Yur,C,X,Y))
+            )
+            
+        );
+        passUL(X,Y,Xul,Yul,Vul,[u|P]),
+        (
+            (Vul == 0) -> (
+            format('\nAdd Up Left to ~d ~d in Open List', [Xul, Yul]),
+            (
+                
+                % There is a human, then it is a handover with cost 1
+                h(Xul,Yul) ->
+                (
+
+                    aStarClosedList(X,Y,Gcost_old,_,_),
+                    not(aStarClosedList(Xul,Yul,_,_,_)) ->
+                    (
+                        Gcost_new is Gcost_old +1,
+                        format(' with cost ~d',[Gcost_new]),
+                        asserta(aStarOpenList(Xul,Yul,Gcost_new,X,Y)) 
+                    )
+                )
+                
+            )),
+        param(NStepsAhead, numStepsAhead),
+        succ(N,Nnew),
+        (Nnew < NStepsAhead) ->
+        (
+            aStarOpenList(Xul,Yul,C,X,Y),
+            asserta(aStarClosedList(Xul,Yul,C,X,Y)),
+            addNeighbourhood(Xul,Yul,Nnew,[Xul,Yul,m|P]),
+            retract(aStarClosedList(Xul,Yul,C,X,Y))
+        )
+            
+        );
+        passDR(X,Y,Xdr,Ydr,Vdr,[u|P]),
+        (
+            (Vdr == 0) -> (
+            format('\nAdd Down Right to ~d ~d in Open List', [Xdr, Ydr]),
+            (
+                
+                % There is a human, then it is a handover with cost 1
+                h(Xdr,Ydr) ->
+                (
+
+                    aStarClosedList(X,Y,Gcost_old,_,_),
+                    not(aStarClosedList(Xdr,Ydr,_,_,_)) ->
+                    (
+                        Gcost_new is Gcost_old +1,
+                        format(' with cost ~d',[Gcost_new]),
+                        asserta(aStarOpenList(Xdr,Ydr,Gcost_new,X,Y)) 
+                    )
+                )
+                
+            )),
+        param(NStepsAhead, numStepsAhead),
+        succ(N,Nnew),
+        (Nnew < NStepsAhead) ->
+        (
+            aStarOpenList(Xdr,Ydr,C,X,Y),
+            asserta(aStarClosedList(Xdr,Ydr,C,X,Y)),
+            addNeighbourhood(Xdr,Ydr,Nnew,[Xdr,Ydr,m|P]),
+            retract(aStarClosedList(Xdr,Ydr,C,X,Y))
+        )
+            
+        );
+        passDL(X,Y,Xdl,Ydl,Vdl,[u|P]),
+        (
+            (Vdl == 0) -> (
+            format('\nAdd Down Left to ~d ~d in Open List', [Xdl, Ydl]),
+            (
+                
+                % There is a human, then it is a handover with cost 1
+                h(Xdl,Ydl) ->
+                (
+
+                    aStarClosedList(X,Y,Gcost_old,_,_),
+                    not(aStarClosedList(Xdl,Ydl,_,_,_)) ->
+                    (
+                        Gcost_new is Gcost_old +1,
+                        format(' with cost ~d',[Gcost_new]),
+                        asserta(aStarOpenList(Xdl,Ydl,Gcost_new,X,Y)) 
+                    )
+                )
+                
+            )),
+        param(NStepsAhead, numStepsAhead),
+        succ(N,Nnew),
+        (Nnew < NStepsAhead) ->
+        (
+            aStarOpenList(Xdl,Ydl,C,X,Y),
+            asserta(aStarClosedList(Xdl,Ydl,C,X,Y)),
+            addNeighbourhood(Xdl,Ydl,Nnew,[Xdl,Ydl,m|P]),
+            retract(aStarClosedList(Xdl,Ydl,C,X,Y))
+        )
+            
         )
     )
 ). 
@@ -880,8 +1000,8 @@ aStarSearch(X,Y,NStepsAhead,P) :-
     printClosedList(CList),
     format('\n -----------------------------------------------------\n'),
 
-    mapTouchDown(Xt,Yt), 
-    (reached(X,Y); aStarOpenList(Xt,Yt,Vt,_,_)) -> 
+    (mapTouchDown(Xt,Yt), 
+    (reached(X,Y); aStarOpenList(Xt,Yt,Vt,_,_);aStarClosedList(Xt,Yt,Vt,_,_))) -> 
     (
         retractall(aStarOpenList(Xt,Yt,_,_,_)),
         asserta(aStarClosedList(Xt,Yt,Vt,X,Y)),
@@ -890,6 +1010,7 @@ aStarSearch(X,Y,NStepsAhead,P) :-
         printlst(Pp),
         format('\n ----------- Shortest Path ------------\n'),
         format(' (~d,~d)', [Xt,Yt]),
+        retractall(aStarShortestPath(_,_)),
         assert(aStarShortestPath(Xt,Yt)),
         getPath(P,Xt,Yt),
         format('\n----------------------------\n'),
@@ -943,6 +1064,9 @@ mainRandomSearch :-
 
 mainAStarSearch :-
     initMain
+    ,retractall(aStarShortestPath(_,_))
+    ,retractall(aStarClosedList(_,_,_,_,_))
+    ,retractall(aStarOpenList(_,_,_,_,_))
     ,mapStart(Xs,Ys)
     ,param(S_ahead, numStepsAhead)
     ,param(N,mapSize)
