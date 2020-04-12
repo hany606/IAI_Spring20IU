@@ -2,9 +2,11 @@
 from PIL import Image as PImage
 import numpy as np
 
-def preview_img(img):
-    img.rotate(np.pi/4)
-    img.show()
+def preview_img(img, title=None):
+    if(title is not None):
+        img.show(title=title)
+    else:
+        img.show()
 
 def read_img(img_path):
     img = PImage.open(img_path)
@@ -23,11 +25,21 @@ def write_img(img_path, img):
 
 def create_gif(gif_path, imgs):
     init_img = imgs[0]
-    init_img.save(gif_path, save_all=True, append_images=imgs[1:])
+    init_img.save(gif_path, save_all=True, append_images=imgs[1:], loop=1)
+
+def read_small_imgs(assets_dir="../assets/mnist_png/mnist_png/testing/All_resized8x8/", size=10000):
+    imgs = []
+    for i in range(size):
+        img = read_img(assets_dir+"{:}.png".format(i))
+        img_np = to_numpy(img)
+        imgs.append(img_np)
+    return imgs
+    print("--------- Finished reading all the small imgs -----------")
+
 
 class Image:
     # index and rotation are 64x64 = (512/8 x 512/8) matrix that have the indices of the small images for each
-    def __init__(self,imgs, src_path="../assets/mnist_png/mnist_png/testing/All_resized8x8/",
+    def __init__(self, imgs, src_path="../assets/mnist_png/mnist_png/testing/All_resized8x8/",
                 index=None, size = (512, 512), imgs_size=(8,8)):
         self.index = index
         self.src_path = src_path
@@ -38,6 +50,9 @@ class Image:
 
     def set_index(self,index):
         self.index = index
+
+    def get_index(self):
+        return self.index
 
     def construct_img(self):
         num_rows_small = self.imgs_size[0]
