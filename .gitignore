@@ -1,3 +1,5 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+
+Assignments/Assignment2/assets/mnist_png/mnist_png
