@@ -27,9 +27,9 @@ def create_gif(gif_path, imgs):
     init_img = imgs[0]
     init_img.save(gif_path, save_all=True, append_images=imgs[1:], loop=1)
 
-def read_small_imgs(assets_dir="../assets/mnist_png/mnist_png/testing/All_resized8x8/", size=10000):
+def read_small_imgs(assets_dir="../../assets/mnist_png/mnist_png/testing/All_resized8x8/", num=10000):
     imgs = []
-    for i in range(size):
+    for i in range(num):
         img = read_img(assets_dir+"{:}.png".format(i))
         img_np = to_numpy(img)
         imgs.append(img_np)
@@ -39,7 +39,7 @@ def read_small_imgs(assets_dir="../assets/mnist_png/mnist_png/testing/All_resize
 
 class Image:
     # index and rotation are 64x64 = (512/8 x 512/8) matrix that have the indices of the small images for each
-    def __init__(self, imgs, src_path="../assets/mnist_png/mnist_png/testing/All_resized8x8/",
+    def __init__(self, imgs, src_path="../../assets/mnist_png/mnist_png/testing/All_resized8x8/",
                 index=None, size = (512, 512), imgs_size=(8,8)):
         self.index = index
         self.src_path = src_path

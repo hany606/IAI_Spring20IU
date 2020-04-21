@@ -3,3 +3,14 @@ __pycache__/
 *.py[cod]
 
 Assignments/Assignment2/assets/mnist_png/mnist_png
+Assignments/Assignment2/assets/CIFAR_dataset/imgs
+Assignments/Assignment2/assets/CIFAR_dataset/cifar-10-python.tar.gz
+Assignments/Assignment2/assets/CIFAR_dataset/cifar_imgs_github/cifar-10-batches-py
+
+Assignments/Assignment2/assets/CIFAR_dataset/cifar_imgs_github/train
+Assignments/Assignment2/assets/CIFAR_dataset/cifar_imgs_github/test
+Assignments/Assignment2/assets/CIFAR_dataset/cifar_imgs_github/*.txt
+Assignments/Assignment2/assets/CIFAR_dataset/cifar_imgs_github/Test_cntk_text.txt
+Assignments/Assignment2/assets/CIFAR_dataset/cifar_imgs_github/Train_cntk_text.txt
+
+

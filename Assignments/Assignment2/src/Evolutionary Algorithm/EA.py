@@ -1,12 +1,17 @@
 # This file related to the implementation of the evolutionary algorithm
+import os,sys,inspect
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)+"/Shared/"
+sys.path.insert(0, parent_dir) 
 import utils
+
 import numpy as np
 from tqdm import tqdm
 import random
 
 
 class EA:
-    def __init__(self, input_img, small_imgs_assets_path="../assets/mnist_png/mnist_png/testing/All_resized8x8/", small_imgs_size=10000):
+    def __init__(self, input_img, small_imgs_assets_path="../../assets/mnist_png/mnist_png/testing/All_resized8x8/", small_imgs_num=10000):
         self.input_img = utils.to_numpy(input_img)
         self.threshold = 100   # To be chosen, the threshold that the fitness score is acceptable
         self.progress_imgs = []
@@ -18,7 +23,7 @@ class EA:
         self.max_index_imgs = 10000
         self.size_imgs = (64,64)
 
-        self.imgs = utils.read_small_imgs(assets_dir=small_imgs_assets_path, size=small_imgs_size)
+        self.imgs = utils.read_small_imgs(assets_dir=small_imgs_assets_path, size=small_imgs_num)
 
         self.current_population = self._generate_population()
 
@@ -100,12 +105,12 @@ class EA:
                 print("###############")
                 # BUG BUG BUG
                 child_indexes = np.concatenate((parent1.get_index()[:rows_mid,:cols_mid],parent2.get_index()[rows_mid:,cols_mid:]))
-                print("AsDasdasd")
                 # for r in range(rows_mid):
                 #     for c in range(cols_mid):
                 #         child_indexes[rows_mid+r][cols_mid+c] = parent2.get_index()[rows_mid+r][cols_mid+c]
 
                 print("###############")
+                print(parent1.get_index()[0])
                 print(parent1.get_index()[-1])
                 print(parent2.get_index()[-1])
                 print(child_indexes[-1])

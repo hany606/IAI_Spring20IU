@@ -1,13 +1,18 @@
 # Source: https://www.geeksforgeeks.org/python-pil-image-resize-method/ & https://stackoverflow.com/questions/273946/how-do-i-resize-an-image-using-pil-and-maintain-its-aspect-ratio
+import os,sys,inspect
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)+"/Shared/"
+sys.path.insert(0, parent_dir) 
 import utils
+
 from PIL import Image
 import numpy as np
 
 def resize():
     size = (8, 8)
     # input_dir = "../input/"
-    input_dir = "../assets/mnist_png/mnist_png/testing/All/"
-    output_dir = "../assets/mnist_png/mnist_png/testing/All_resized8x8/"
+    input_dir = "../../assets/mnist_png/mnist_png/testing/All/"
+    output_dir = "../../assets/mnist_png/mnist_png/testing/All_resized8x8/"
     for i in range(10000):
         inp_img_path = input_dir+"{:}.png".format(i)
         img = Image.open(inp_img_path)
@@ -19,8 +24,8 @@ def resize():
 
 # change some of the pictures to only black
 def changer():
-    input_dir = "../assets/mnist_png/mnist_png/testing/All_resized8x8/"
-    output_dir = "../assets/mnist_png/mnist_png/testing/All_resized8x8/"
+    input_dir = "../../assets/mnist_png/mnist_png/testing/All_resized8x8/"
+    output_dir = "../../assets/mnist_png/mnist_png/testing/All_resized8x8/"
     for _ in range(100):
         idx = np.random.randint(10000)
         inp_img_path = input_dir+"{:}.png".format(idx)
