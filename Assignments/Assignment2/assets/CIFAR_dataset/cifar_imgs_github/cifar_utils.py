@@ -31,15 +31,15 @@ def readBatch(src):
 
 def loadData(src):
     print ('Downloading ' + src)
-    fname, h = urlretrieve(src, './delete.me')        # Comment if you have the dataset locally
+    # fname, h = urlretrieve(src, './delete.me')        # Comment if you have the dataset locally
     print ('Done.')
     try:
         print ('Extracting files...')
 
         # --------------------------------------------------        
         # Comment if you have the dataset locally
-        with tarfile.open(fname) as tar:
-            tar.extractall()
+        # with tarfile.open(fname) as tar:
+        #     tar.extractall()
         # --------------------------------------------------
 
         print ('Done.')
@@ -53,8 +53,8 @@ def loadData(src):
         tst = readBatch('./cifar-10-batches-py/test_batch')
         print ('Done.')
     finally:
-        # pass    # Comment if you don't have the dataset locally
-        os.remove(fname)  # Comment if you have the dataset locally
+        pass    # Comment if you don't have the dataset locally
+        # os.remove(fname)  # Comment if you have the dataset locally
     return (trn, tst)
 
 def saveTxt(filename, ndarray):
@@ -119,7 +119,7 @@ def saveTrainImages(filename, foldername):
                         data = cp.load(f, encoding='latin1')
                     for i in range(10000):
                         fname = os.path.join(os.path.abspath(foldername), ('%05d.png' % (i + (ifile - 1) * 10000)))
-                        saveImage(fname, data['data'][i, :], data['labels'][i], mapFile, regrFile, 4, mean=dataMean)
+                        saveImage(fname, data['data'][i, :], data['labels'][i], mapFile, regrFile, 0, mean=dataMean)
     dataMean = dataMean / (50 * 1000)
     saveMean('CIFAR-10_mean.xml', dataMean)
 

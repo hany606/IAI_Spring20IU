@@ -27,10 +27,13 @@ def create_gif(gif_path, imgs):
     init_img = imgs[0]
     init_img.save(gif_path, save_all=True, append_images=imgs[1:], loop=1)
 
-def read_small_imgs(assets_dir="../../assets/mnist_png/mnist_png/testing/All_resized8x8/", num=10000):
+def read_small_imgs(assets_dir="../../assets/mnist_png/mnist_png/testing/All_resized8x8/", num=10000, format_str=None):
     imgs = []
     for i in range(num):
-        img = read_img(assets_dir+"{:}.png".format(i))
+        if(format_str is None):
+            img = read_img(assets_dir+"{:}.png".format(i))
+        else:
+            img = read_img(assets_dir+format_str.format(i))            
         img_np = to_numpy(img)
         imgs.append(img_np)
     return imgs
