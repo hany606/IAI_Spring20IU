@@ -9,11 +9,11 @@ import numpy as np
 
 input_dir = "../../input/"
 output_dir = "../../output/"
-assets_dir = "../../assets/mnist_png/mnist_png/testing/All_resized8x8/"
-small_imgs_num = 10000
-inp_img_path = input_dir+"input2_bw.png"
-out_img_path = output_dir+"output.png"
-out_gif_path = output_dir+"output.gif"
+assets_dir = "../../assets/CIFAR_dataset/imgs/imgs_resized/"
+small_imgs_num = 50000
+inp_img_path = input_dir+"input.png"
+out_img_path = output_dir+"output_8x8.png"
+out_gif_path = output_dir+"output_8x8.gif"
 
 
 # --------------- Testing ------------------
@@ -47,7 +47,7 @@ out_gif_path = output_dir+"output.gif"
 
 img = utils.read_img(inp_img_path)
 
-algo = EA(img, small_imgs_assets_path=assets_dir, small_imgs_num=small_imgs_num)
+algo = EA(img, small_imgs_assets_path=assets_dir, small_imgs_num=small_imgs_num, format_str="{:05d}.png")
 
 progress_imgs, out_img = algo.train()
 
@@ -56,3 +56,6 @@ utils.preview_img(out_img)
 utils.create_gif(out_gif_path, progress_imgs)
 # utils.write_img(out_img_path, out_img)
 out_img.save(out_img_path, "PNG")
+
+
+

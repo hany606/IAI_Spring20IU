@@ -11,10 +11,10 @@ from tqdm import tqdm
 
 
 def resize():
-    size = (8, 8)
+    size = (16, 16)
     # input_dir = "../input/"
     input_dir = "../../assets/CIFAR_dataset/imgs/imgs_original/"
-    output_dir = "../../assets/CIFAR_dataset/imgs/imgs_resized/"
+    output_dir = "../../assets/CIFAR_dataset/imgs/imgs_resized_16x16/"
     for i in tqdm(range(50000)):
         inp_img_path = input_dir+"{:05d}.png".format(i)
         # print(inp_img_path)

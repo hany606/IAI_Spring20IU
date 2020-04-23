@@ -11,7 +11,7 @@ from time import time
 input_dir = "../../input/"
 output_dir = "../../output/"
 assets_dir = "../../assets/CIFAR_dataset/imgs/imgs_resized/"
-small_imgs_num = 50001
+small_imgs_num = 50000
 inp_img_path = input_dir+"input.png"
 out_img_path = output_dir+"Baseline_output8x8.png"
 
@@ -84,7 +84,7 @@ def generate_baseline_img(small_imgs, input_img):
 img = utils.read_img(inp_img_path)
 
 
-imgs = utils.read_small_imgs(assets_dir=assets_dir, num = small_imgs_num-1, format_str="{:05d}.png")
+imgs = utils.read_small_imgs(assets_dir=assets_dir, num = small_imgs_num, format_str="{:05d}.png")
 # indexes = []
 # for i in range(64):
 #     indexes.append([np.random.randint(10000) for i in range(64)])
