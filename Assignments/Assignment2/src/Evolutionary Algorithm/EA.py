@@ -80,6 +80,7 @@ class EA:
         # if(score < self.min_score):
         #     self.min_score = score
         #     self.min_arg_score = i
+        # print(score)
         return score
 
     def _fitness(self, population=None):
@@ -107,130 +108,66 @@ class EA:
 
 
     def _crossover(self):
+        def parents_parts(num):
+            offspring = []
+            for i in range(num):
+                parent1_img = random.choice(self.current_population)["img"]
+                parent2_img = random.choice(self.current_population)["img"]
+                child = {"img":utils.Image(imgs=self.imgs, imgs_shape=self.small_img_shape), "score":-1}
+                
+                # threshold = np.random.uniform(0,1)
+
+                child_indexes = parent1_img.get_index().copy()
+                # old_child_indexes = child_indexes.copy()
+                total_num_rc = parent1_img.get_index().shape
+                num_rows_selected = int(total_num_rc[0]*self.crossover_percentage[0])
+                num_cols_selected = int(total_num_rc[1]*self.crossover_percentage[1])
+                parent1_parts = tuple([parent1_img.get_index()[:num_rows_selected,:num_cols_selected], parent1_img.get_index()[num_rows_selected:,num_cols_selected:]])
+                parent2_parts = tuple([parent2_img.get_index()[:num_rows_selected,:num_cols_selected], parent2_img.get_index()[num_rows_selected:,num_cols_selected:]])
+                parts_1p = tuple([parent1_parts[0], parent2_parts[0]])
+                parts_2p = tuple([parent1_parts[1], parent2_parts[1]])
+
+                # all parts can swapped together
+                if(num_rows_selected == total_num_rc[0]-num_rows_selected and num_cols_selected == total_num_rc[1]-num_cols_selected):
+                    parts = tuple([parts_1p[0], parts_1p[1], parts_2p[0], parts_2p[1]])
+                    child_indexes[:num_rows_selected, :num_cols_selected] = random.choice(parts)
+                    child_indexes[num_rows_selected:, num_cols_selected:] = random.choice(parts)
+
+                else:
+                    child_indexes[:num_rows_selected, :num_cols_selected] = random.choice(parts_1p)
+                    child_indexes[num_rows_selected:, num_cols_selected:] = random.choice(parts_2p)
+
+                child["img"].set_index(child_indexes)
+                child["score"] = self._fitness_single(child["img"].construct_img())
+                
+                offspring.append(child)
+            return offspring
+        
+        # Most probably it will computationally expensive but much more efficient
+        def greedy_parts(num):
+            return
+            offspring = []
+            for _ in range(num):
+                child = {"img":utils.Image(imgs=self.imgs, imgs_shape=self.small_img_shape), "score":-1}
+                unknown_indexes = self.current_population[0]["img"].get_index()
+                child_indexes = unknown_indexes.get_index().copy()
+
+                # for rows in child_indexes
+                    # for cols in child_indexes
+                        # calculate error and get minimum
+
+                for i,index in enumerate(child_indexes):
+                    mn_idx = 0
+                    mn_error = 100000000000000
+                    for population_member_dict in self.current_population:
+                        img_indexes = population_member_dict["img"].get_index()
+                        error = self.calc_error(self.imgs[img_indexes[i]],0)
+
         print("----------------------- Crossover -----------------------")
-        offspring = []
         # Generate offspring from the best from the population to get the missed number of the population of the current population
         population_size_missed = int((self.population_size - len(self.current_population)))
-        for i in range(population_size_missed):
-            parent1_img = random.choice(self.current_population)["img"]
-            parent2_img = random.choice(self.current_population)["img"]
-            child = {"img":utils.Image(imgs=self.imgs, imgs_shape=self.small_img_shape), "score":-1}
-            
-            # threshold = np.random.uniform(0,1)
-
-            child_indexes = parent1_img.get_index().copy()
-            # old_child_indexes = child_indexes.copy()
-            total_num_rc = parent1_img.get_index().shape
-            num_rows_selected = int(total_num_rc[0]*self.crossover_percentage[0])
-            num_cols_selected = int(total_num_rc[1]*self.crossover_percentage[1])
-            parent1_parts = tuple([parent1_img.get_index()[:num_rows_selected,:num_cols_selected], parent1_img.get_index()[num_rows_selected:,num_cols_selected:]])
-            parent2_parts = tuple([parent2_img.get_index()[:num_rows_selected,:num_cols_selected], parent2_img.get_index()[num_rows_selected:,num_cols_selected:]])
-            parts_1p = tuple([parent1_parts[0], parent2_parts[0]])
-            parts_2p = tuple([parent1_parts[1], parent2_parts[1]])
-
-            # all parts can swapped together
-            if(num_rows_selected == total_num_rc[0]-num_rows_selected and num_cols_selected == total_num_rc[1]-num_cols_selected):
-                parts = tuple([parts_1p[0], parts_1p[1], parts_2p[0], parts_2p[1]])
-                child_indexes[:num_rows_selected, :num_cols_selected] = random.choice(parts)
-                child_indexes[num_rows_selected:, num_cols_selected:] = random.choice(parts)
-
-            else:
-                child_indexes[:num_rows_selected, :num_cols_selected] = random.choice(parts_1p)
-                child_indexes[num_rows_selected:, num_cols_selected:] = random.choice(parts_2p)
-            # ------------------------------------ Old -----------------------------------------------
-            # # print(threshold)
-            # # The 1st part is from 1st part parent1_img, the 2nd part is from 2nd part of parent2_img
-            # if(threshold < 0.125):
-            # # if(threshold <= 1):
-            #     print("1")
-            #     child_indexes[:num_rows_selected, :num_cols_selected] = parent1_img.get_index()[:num_rows_selected,:num_cols_selected]
-            #     child_indexes[num_rows_selected:, num_cols_selected:] = parent2_img.get_index()[num_rows_selected:,num_cols_selected:]
-            #     # print("###############")
-            #     # BUG BUG BUG
-            #     # child_indexes = np.concatenate((parent1_img.get_index()[:num_rows_selected,:num_cols_selected],parent2_img.get_index()[num_rows_selected:,num_cols_selected:]))
-            #     # for r in range(num_rows_selected):
-            #     #     for c in range(num_cols_selected):
-            #     #         child_indexes[num_rows_selected+r][num_cols_selected+c] = parent2_img.get_index()[num_rows_selected+r][num_cols_selected+c]
-
-            #     # print("###############")
-            #     # print(parent1_img.get_index()[0])
-            #     # print(parent1_img.get_index()[-1])
-            #     # print(parent2_img.get_index()[-1])
-            #     # print(child_indexes[-1])
-            # # The 1st part is from 2nd part parent1_img, the 2nd part is from 1st part of parent2_img
-            # elif(threshold < 0.25):
-            #     print("2")
-            #     child_indexes[:num_rows_selected, :num_cols_selected] = parent1_img.get_index()[num_rows_selected:,num_cols_selected:]
-            #     child_indexes[num_rows_selected:, num_cols_selected:] = parent2_img.get_index()[:num_rows_selected,:num_cols_selected]
-            #     # child_indexes[num_rows_selected:,num_cols_selected:] = parent1_img.get_index()[:num_rows_selected,num_cols_selected]
-            #     # child_indexes[:num_rows_selected,:num_cols_selected] = parent2_img.get_index()[num_rows_selected:,num_cols_selected:]
-
-
-            # # The 1st part is from 2nd part parent2_img, the 2nd part is from 1st part of parent1_img
-            # elif(threshold < 0.375):
-            #     print("3")
-            #     child_indexes[:num_rows_selected, :num_cols_selected] = parent2_img.get_index()[num_rows_selected:,num_cols_selected:]
-            #     child_indexes[num_rows_selected:, num_cols_selected:] = parent1_img.get_index()[:num_rows_selected,:num_cols_selected]
-            #     # child_indexes[:num_rows_selected,:num_cols_selected] = parent2_img.get_index()[num_rows_selected:,num_cols_selected:]
-            #     # child_indexes[num_rows_selected:,num_cols_selected:] = parent1_img.get_index()[:num_rows_selected,:num_cols_selected]
-
-            # # The 1st part is from 1st part parent2_img, the 2nd part is from 2nd part of parent1_img
-            # elif(threshold < 0.5):
-            #     print("4")
-            #     child_indexes[:num_rows_selected, :num_cols_selected] = parent2_img.get_index()[:num_rows_selected,:num_cols_selected]
-            #     child_indexes[num_rows_selected:, num_cols_selected:] = parent1_img.get_index()[num_rows_selected:,num_cols_selected:]
-            #     # child_indexes[:num_rows_selected,:num_cols_selected] = parent2_img.get_index()[:num_rows_selected,:num_cols_selected]
-            #     # child_indexes[num_rows_selected:,num_cols_selected:] = parent1_img.get_index()[num_rows_selected:,num_cols_selected:]
-
-            # # The 1st part is from 2nd part parent1_img, the 2nd part is from 2nd part of parent2_img
-            # elif(threshold < 0.625):
-            #     print("5")
-            #     child_indexes[:num_rows_selected, :num_cols_selected] = parent1_img.get_index()[num_rows_selected:,num_cols_selected:]
-            #     child_indexes[num_rows_selected:, num_cols_selected:] = parent2_img.get_index()[num_rows_selected:,num_cols_selected:]
-            #     # child_indexes[:num_rows_selected,:num_cols_selected] = parent1_img.get_index()[num_rows_selected:,num_cols_selected:]
-            #     # child_indexes[num_rows_selected:,num_cols_selected:] = parent2_img.get_index()[num_rows_selected:,num_cols_selected:]
-
-            # # The 1st part is from 1st part parent1_img, the 2nd part is from 1st part of parent2_img
-            # elif(threshold < 0.75):
-            #     print("6")
-            #     child_indexes[:num_rows_selected,:num_cols_selected] = parent2_img.get_index()[num_rows_selected:,num_cols_selected:]
-            #     child_indexes[num_rows_selected:,num_cols_selected:] = parent1_img.get_index()[:num_rows_selected,:num_cols_selected]
-
-            # # The 1st part is from 2nd part parent2_img, the 2nd part is from 2nd part of parent1_img
-            # elif(threshold < 0.875):
-            #     print("7")
-            #     child_indexes[:num_rows_selected,:num_cols_selected] = parent2_img.get_index()[num_rows_selected:,num_cols_selected:]
-            #     child_indexes[num_rows_selected:,num_cols_selected:] = parent1_img.get_index()[num_rows_selected:,num_cols_selected:]
-
-            # # The 1st part is from 1st part of parent2_img, the 2nd part is from 1st part of parent1_img            
-            # else:
-            #     print("8")
-            #     child_indexes[:num_rows_selected,:num_cols_selected] = parent2_img.get_index()[:num_rows_selected,:num_cols_selected]
-
-            child["img"].set_index(child_indexes)
-            child["score"] = self._fitness_single(child["img"].construct_img())
-            
-            # print("################")
-            # print(child_indexes[-1])
-            # # Error child indexes is not changing
-            # s = 0
-            # for i in range(len(child_indexes)):
-            #     s += abs(child_indexes[i]-old_child_indexes[i])
-            #     # s += abs(parent1_img.get_index()[i]-parent2_img.get_index()[i])
-            # print("s=",s)
-            
-            # utils.preview_img(utils.to_img(parent1_img.construct_img()), title="parent1_img")
-            # input()
-            # utils.preview_img(utils.to_img(parent2_img.construct_img()), title="parent2_img")
-            # input()
-            # utils.preview_img(utils.to_img(child["img"].construct_img()), title="child")
-            # input()
-            # print(self.calc_error(parent1_img.construct_img(), child["img"].construct_img()))
-            
-            offspring.append(child)
-
-        self.current_population.extend(offspring)
-
+        offspring = parents_parts(population_size_missed)
+        self.current_population.extend(offspring)   
         print("--------------------------------------------------------")
 
 
@@ -287,6 +224,8 @@ class EA:
             self.output_img = mn_img
             # utils.preview_img(mn_img)
             self.progress_imgs.append(mn_img)
+            # print(self.current_population[termination[1]]["score"])
+            # # exit()
             score_iteration_list.append(self.current_population[termination[1]]["score"])
             # self.current_population = self._generate_population(parent=self.current_population)
         print(score_iteration_list)
