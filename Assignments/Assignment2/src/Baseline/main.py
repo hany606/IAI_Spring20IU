@@ -10,13 +10,13 @@ from time import time
 
 input_dir = "../../input/"
 output_dir = "../../output/"
-assets_dir = "../../assets/CIFAR_dataset/imgs/imgs_original/"
+assets_dir = "../../assets/CIFAR_dataset/imgs/imgs_resized/"
 small_imgs_num = 50001
 inp_img_path = input_dir+"input.png"
-out_img_path = output_dir+"Baseline_output.png"
+out_img_path = output_dir+"Baseline_output8x8.png"
 
 big_img_size = (512,512)
-small_img_size = (32,32)
+small_img_size = (8,8)
 
 def calc_error(input_img, gen_img):
     shape = input_img.shape
