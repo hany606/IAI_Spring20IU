@@ -16,15 +16,15 @@ class EA:
         self.progress_imgs = []
 
         # Parameters to be tuned
-        self.num_iterations = 10
-        self.population_size = 10
-        self.selection_percentage = 0.5
+        self.num_iterations = 100
+        self.population_size = 50
+        self.selection_percentage = 0.2
         self.crossover_percentage = (0.5,0.5)   # ((row, col) in case of two parents
         self.crossover_num_parents = 2  # Not implemented for now for crossover with multiple parent
         self.mutation_probability = 0.1
-        self.hybrid_crossover_ratio = {"uniform":0, "parts":0, "greedy":0.5}
-        self.termination_threshold = 550   # To be chosen, the threshold that the fitness score is acceptable
-        self.crossover_greedy_probability = 0.5
+        self.hybrid_crossover_ratio = {"uniform":0, "parts":0.5, "greedy":0.5}
+        self.termination_threshold = 800   # To be chosen, the threshold that the fitness score is acceptable
+
 
         self.img_size = (512,512)
 
@@ -215,8 +215,6 @@ class EA:
             
             for index_row,row in tqdm(enumerate(child_indexes)):
                 for index_col,_ in tqdm(enumerate(row)):
-                    if(np.random.uniform(0,1) < self.crossover_greedy_probability):
-                        pass
                     mn_error = 10000000000000000
                     mn_index = 0
                     for i in tqdm(range(parent_num)):
@@ -252,7 +250,7 @@ class EA:
         # self.current_population.extend(offspring)
 
         num_population_left = population_size_missed - len(offspring)
-        offspring = greedy_parts_v2(num_population_left, parent_num=2)
+        offspring = greedy_parts_v2(num_population_left)
         self.current_population.extend(offspring)
         print("--------------------------------------------------------")
 
