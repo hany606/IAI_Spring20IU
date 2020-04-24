@@ -22,7 +22,7 @@ class EA:
         self.selection_percentage = 0.2   # 0.2
         self.crossover_percentage = (0.5,0.5)   # ((row, col) in case of two parents
         self.crossover_num_parents = 2  # Not implemented for now for crossover with multiple parent
-        self.mutation_probability = 0.2
+        self.mutation_probability = 0.1   # Modified 0.2
 
         self.img_size = (512,512)
 
@@ -144,30 +144,55 @@ class EA:
             return offspring
         
         # Most probably it will computationally expensive but much more efficient
-        def greedy_parts(num):
-            return
-            offspring = []
-            for _ in range(num):
-                child = {"img":utils.Image(imgs=self.imgs, imgs_shape=self.small_img_shape), "score":-1}
-                unknown_indexes = self.current_population[0]["img"].get_index()
-                child_indexes = unknown_indexes.get_index().copy()
+        def greedy_parts(gen_num, parent_num=None):
+            if(parent_num is None):
+                parent_num = len(self.current_population)
+            initial_indexes = self.current_population[0]["img"].get_index()
+            child = {"img":utils.Image(imgs=self.imgs, imgs_shape=self.small_img_shape), "score":-1}
+            child_indexes = initial_indexes.copy()
+            
+            # child["img"].set_index(child_indexes)
+            # child["score"] = self._fitness_single(child["img"].construct_img())
+            # print(child["score"])
+            # input("~~~INPUT DEBUG")
 
-                # for rows in child_indexes
-                    # for cols in child_indexes
-                        # calculate error and get minimum
+            parent_num = min(parent_num, len(self.current_population))
+            parents = random.choices(self.current_population, k=parent_num)
+            
+            for index_row,row in enumerate(child_indexes):
+                for index_col,_ in enumerate(row):
+                    mn_error = 10000000000000000
+                    mn_index = 0
+                    for i in range(parent_num):
+                        # print(parents[i]["img"].get_index())
+                        parent_gene_index = parents[i]["img"].get_index()[index_row][index_col]
+                        parent_img_gene = self.imgs[parent_gene_index]
+                        rlim, clim = self.small_img_shape[:2]
+                        input_img_gene  = self.input_img[rlim*index_row:rlim*index_row+rlim, clim*index_col:clim*index_col+clim]
+                        error = self.calc_error(input_img_gene, parent_img_gene)
+                        if(error < mn_error):
+                            mn_error = error
+                            mn_index = parent_gene_index
+                    
+                    child_indexes[index_row][index_col] = mn_index
 
-                for i,index in enumerate(child_indexes):
-                    mn_idx = 0
-                    mn_error = 100000000000000
-                    for population_member_dict in self.current_population:
-                        img_indexes = population_member_dict["img"].get_index()
-                        error = self.calc_error(self.imgs[img_indexes[i]],0)
+            child["img"].set_index(child_indexes)
+            child["score"] = self._fitness_single(child["img"].construct_img())
+
+            # print(child["score"])
+            # input("~~~INPUT DEBUG")
+
+            offspring = [child for _ in range(gen_num)]
+            return offspring
 
         print("----------------------- Crossover -----------------------")
         # Generate offspring from the best from the population to get the missed number of the population of the current population
         population_size_missed = int((self.population_size - len(self.current_population)))
-        offspring = parents_parts(population_size_missed)
-        self.current_population.extend(offspring)   
+        # offspring = parents_parts(population_size_missed)
+        offspring = parents_parts(population_size_missed//2)       # Modified Commented
+        self.current_population.extend(offspring)                  # Modified Commented
+        offspring = greedy_parts(population_size_missed - (population_size_missed//2))
+        self.current_population.extend(offspring)
         print("--------------------------------------------------------")
 
 
@@ -224,7 +249,7 @@ class EA:
             self.output_img = mn_img
             # utils.preview_img(mn_img)
             self.progress_imgs.append(mn_img)
-            # print(self.current_population[termination[1]]["score"])
+            print(self.current_population[termination[1]]["score"])
             # # exit()
             score_iteration_list.append(self.current_population[termination[1]]["score"])
             # self.current_population = self._generate_population(parent=self.current_population)

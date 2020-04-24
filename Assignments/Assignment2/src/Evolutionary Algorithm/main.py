@@ -7,13 +7,23 @@ import utils
 from EA import EA
 import numpy as np
 
+import argparse
+parser = argparse.ArgumentParser(description='Reproduce images')
+parser.add_argument('-o', action='store', default="output_8x8", type=str, required=False,
+                    dest="output_file_name", help='Specify the output file name')
+
+results = parser.parse_args()
+
 input_dir = "../../input/"
 output_dir = "../../output/"
 assets_dir = "../../assets/CIFAR_dataset/imgs/imgs_resized/"
 small_imgs_num = 50000
 inp_img_path = input_dir+"input.png"
-out_img_path = output_dir+"output_8x8.png"
-out_gif_path = output_dir+"output_8x8.gif"
+
+output_file_name = results.output_file_name
+
+out_img_path = output_dir+output_file_name+".png"
+out_gif_path = output_dir+output_file_name+".gif"
 
 
 # --------------- Testing ------------------
