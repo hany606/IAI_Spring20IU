@@ -13,16 +13,18 @@ import random
 class EA:
     def __init__(self, input_img, small_imgs_assets_path="../../assets/mnist_png/mnist_png/testing/All_resized8x8/", small_imgs_num=10000, format_str=None):
         self.input_img = utils.to_numpy(input_img)
-        self.threshold = 100   # To be chosen, the threshold that the fitness score is acceptable
         self.progress_imgs = []
 
         # Parameters to be tuned
-        self.num_iterations = 100   # 100
-        self.population_size = 50     # 50
-        self.selection_percentage = 0.2   # 0.2
+        self.num_iterations = 100
+        self.population_size = 50
+        self.selection_percentage = 0.2
         self.crossover_percentage = (0.5,0.5)   # ((row, col) in case of two parents
         self.crossover_num_parents = 2  # Not implemented for now for crossover with multiple parent
-        self.mutation_probability = 0.1   # Modified 0.2
+        self.mutation_probability = 0.1
+        self.hybrid_crossover_ratio = {"uniform":0, "parts":0.5, "greedy":0.5}
+        self.termination_threshold = 800   # To be chosen, the threshold that the fitness score is acceptable
+
 
         self.img_size = (512,512)
 
@@ -36,19 +38,7 @@ class EA:
 
 
         self.current_population = self._generate_population()
-
-    def calc_error(self, input_img, gen_img):
-        shape = input_img.shape
-        error = 0 
-        for r in range(shape[0]):
-            for c in range(shape[1]):
-                for l in range(shape[2]):
-                    loc_error = ((float(input_img[r][c][l]) - float(gen_img[r][c][l]))**2)/(shape[0]*shape[1]*shape[2])
-                    # print(loc_error)
-                    error += loc_error
-        # print(error)
-        return error
-
+    
     # Generate the initial image
     def _generate_population(self, parent=None):
         # Totally random population
@@ -66,17 +56,33 @@ class EA:
 
         return population
 
+
+    # TODO: implement mn score optimization
+    def calc_error(self, input_img, gen_img, mn_error=None):
+        shape = input_img.shape
+        error = 0 
+        for r in range(shape[0]):
+            for c in range(shape[1]):
+                for l in range(shape[2]):
+                    loc_error = ((float(input_img[r][c][l]) - float(gen_img[r][c][l]))**2)/(shape[0]*shape[1]*shape[2])
+                    # print(loc_error)
+                    error += loc_error
+                    if(mn_error is not None and mn_error < error):
+                        return 10000000000
+        # print(error)
+        return error
+
     # This is the fitness function that return how close the input image
     def _fitness_single(self, img_np):
-        rows, cols, channels = img_np.shape
-        score = 0
+        # rows, cols, channels = img_np.shape
+        score = self.calc_error(img_np, self.input_img)
         # print(img_np[0,1], self.input_img[0,1])
-        for r in range(rows):
-            for c in range(cols):
-                for l in range(channels):
-                    loc_score = ((float(img_np[r][c][l]) - float(self.input_img[r][c][l]))**2)/(rows*cols*channels)
-                    # print(loc_error)
-                    score += loc_score
+        # for r in range(rows):
+        #     for c in range(cols):
+        #         for l in range(channels):
+        #             loc_score = ((float(img_np[r][c][l]) - float(self.input_img[r][c][l]))**2)/(rows*cols*channels)
+        #             # print(loc_error)
+        #             score += loc_score
         # if(score < self.min_score):
         #     self.min_score = score
         #     self.min_arg_score = i
@@ -143,8 +149,14 @@ class EA:
                 offspring.append(child)
             return offspring
         
+        # TODO: Create uniform crossover from differnet number of parents and test it, most probably it will be better
+        def uniform(gen_num, parent_num=None):
+            if(parent_num is None):
+                parent_num = len(self.current_population)
+            
         # Most probably it will computationally expensive but much more efficient
-        def greedy_parts(gen_num, parent_num=None):
+        # TODO: Make the last part of creation of the offspring no tappend the same child, that's if the parent_num not equal to the current_population
+        def greedy_parts_v1(gen_num, parent_num=None):
             if(parent_num is None):
                 parent_num = len(self.current_population)
             initial_indexes = self.current_population[0]["img"].get_index()
@@ -185,13 +197,60 @@ class EA:
             offspring = [child for _ in range(gen_num)]
             return offspring
 
+        # TODO: Make the last part of creation of the offspring not append the same child, that's if the parent_num not equal to the current_population
+        def greedy_parts_v2(gen_num, parent_num=None):
+            if(parent_num is None):
+                parent_num = len(self.current_population)
+            initial_indexes = self.current_population[0]["img"].get_index()
+            child = {"img":utils.Image(imgs=self.imgs, imgs_shape=self.small_img_shape), "score":-1}
+            child_indexes = initial_indexes.copy()
+            
+            # child["img"].set_index(child_indexes)
+            # child["score"] = self._fitness_single(child["img"].construct_img())
+            # print(child["score"])
+            # input("~~~INPUT DEBUG")
+
+            parent_num = min(parent_num, len(self.current_population))
+            parents = random.choices(self.current_population, k=parent_num)
+            
+            for index_row,row in tqdm(enumerate(child_indexes)):
+                for index_col,_ in tqdm(enumerate(row)):
+                    mn_error = 10000000000000000
+                    mn_index = 0
+                    for i in tqdm(range(parent_num)):
+                        parent_indexes = parents[i]["img"].get_index()
+                        for parent_index_row,parent_row in enumerate(parent_indexes):
+                            for parent_index_col,_ in enumerate(parent_row):
+                                parent_gene_index = parent_indexes[parent_index_row][parent_index_col]
+                                parent_img_gene = self.imgs[parent_gene_index]
+                                rlim, clim = self.small_img_shape[:2]
+                                input_img_gene  = self.input_img[rlim*index_row:rlim*index_row+rlim, clim*index_col:clim*index_col+clim]
+                                error = self.calc_error(input_img_gene, parent_img_gene, mn_error=mn_error)
+                                if(error < mn_error):
+                                    mn_error = error
+                                    mn_index = parent_gene_index
+                    
+                    child_indexes[index_row][index_col] = mn_index
+
+            child["img"].set_index(child_indexes)
+            child["score"] = self._fitness_single(child["img"].construct_img())
+
+            # print(child["score"])
+            # input("~~~INPUT DEBUG")
+
+            offspring = [child for _ in range(gen_num)]
+            return offspring
+
         print("----------------------- Crossover -----------------------")
         # Generate offspring from the best from the population to get the missed number of the population of the current population
         population_size_missed = int((self.population_size - len(self.current_population)))
+        offspring = []
         # offspring = parents_parts(population_size_missed)
-        offspring = parents_parts(population_size_missed//2)       # Modified Commented
-        self.current_population.extend(offspring)                  # Modified Commented
-        offspring = greedy_parts(population_size_missed - (population_size_missed//2))
+        # offspring = parents_parts(int(population_size_missed*self.hybrid_crossover_ratio["parts"]))
+        # self.current_population.extend(offspring)
+
+        num_population_left = population_size_missed - len(offspring)
+        offspring = greedy_parts_v2(num_population_left)
         self.current_population.extend(offspring)
         print("--------------------------------------------------------")
 
@@ -221,7 +280,8 @@ class EA:
         mn, argmn = self.min_score, self.min_arg_score
         # print(argmn, mn)
         print("--------------------------------------------------------")
-        if(self.threshold > mn):
+        if(self.termination_threshold > mn):
+            print(mn)
             return (True,argmn)
         return (False,argmn)
 
@@ -254,7 +314,7 @@ class EA:
             score_iteration_list.append(self.current_population[termination[1]]["score"])
             # self.current_population = self._generate_population(parent=self.current_population)
         print(score_iteration_list)
-        return self.progress_imgs, self.output_img
+        return self.progress_imgs, self.output_img, score_iteration_list[-1]
     
 if __name__ == "__main__":
     pass

@@ -6,6 +6,8 @@ import utils
 
 from EA import EA
 import numpy as np
+from time import time
+import json
 
 import argparse
 parser = argparse.ArgumentParser(description='Reproduce images')
@@ -14,16 +16,28 @@ parser.add_argument('-o', action='store', default="output_8x8", type=str, requir
 
 results = parser.parse_args()
 
+
 input_dir = "../../input/"
 output_dir = "../../output/"
+
 assets_dir = "../../assets/CIFAR_dataset/imgs/imgs_resized/"
 small_imgs_num = 50000
 inp_img_path = input_dir+"input.png"
 
 output_file_name = results.output_file_name
+output_dir += output_file_name
+
+if(not os.path.exists(output_dir+"/")):
+    output_dir += "/"
+    os.mkdir(output_dir)
+
+else:
+    print("Error repeated directory, put another directory")
+    exit()
 
 out_img_path = output_dir+output_file_name+".png"
 out_gif_path = output_dir+output_file_name+".gif"
+results_log_file_path = output_dir+"results_log({:}).json".format(output_file_name)
 
 
 # --------------- Testing ------------------
@@ -59,7 +73,18 @@ img = utils.read_img(inp_img_path)
 
 algo = EA(img, small_imgs_assets_path=assets_dir, small_imgs_num=small_imgs_num, format_str="{:05d}.png")
 
-progress_imgs, out_img = algo.train()
+init_time = time()
+progress_imgs, out_img, score = algo.train()
+process_time = time() - init_time
+
+print("----------------------- Finish -----------------------")
+print("Total processing time: {:}".format(process_time))
+print("------------------------------------------------------")
+
+with open(results_log_file_path,"w+") as f:
+    results_dict = {"Error_score":score, "output_name": output_file_name, "Total_time": process_time}
+    json.dump(results_dict, f, indent=4)
+
 
 # print(type(out_img))
 utils.preview_img(out_img)
