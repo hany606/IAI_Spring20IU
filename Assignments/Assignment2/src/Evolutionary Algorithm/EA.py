@@ -16,15 +16,15 @@ class EA:
         self.progress_imgs = []
 
         # Parameters to be tuned
-        self.num_iterations = 10
-        self.population_size = 10
+        self.num_iterations = 50000         # 5 for greedy_v2
+        self.population_size = 100       # 10 for greedy_v2
         self.selection_percentage = 0.5
         self.crossover_percentage = (0.5,0.5)   # ((row, col) in case of two parents
-        self.crossover_num_parents = 2  # Not implemented for now for crossover with multiple parent
-        self.mutation_probability = 0.1
+        self.crossover_num_parents = 2
+        self.mutation_probability = 0.01
         self.hybrid_crossover_ratio = {"uniform":0, "parts":0, "greedy":0.5}
         self.termination_threshold = 550   # To be chosen, the threshold that the fitness score is acceptable
-        self.crossover_greedy_probability = 0.5
+        self.crossover_greedy_probability = 1
 
         self.img_size = (512,512)
 
@@ -149,24 +149,44 @@ class EA:
                 offspring.append(child)
             return offspring
         
-        # TODO: Create uniform crossover from differnet number of parents and test it, most probably it will be better
         def uniform(gen_num, parent_num=None):
+            if(gen_num == 0):
+                return 0
             if(parent_num is None):
                 parent_num = len(self.current_population)
+            
+            offspring = []
+
+            for _ in range(gen_num):
+                initial_indexes = self.current_population[0]["img"].get_index()
+                child = {"img":utils.Image(imgs=self.imgs, imgs_shape=self.small_img_shape), "score":-1}
+                child_indexes = initial_indexes.copy()
+                parent_num = min(parent_num, len(self.current_population))
+                parents = random.choices(self.current_population, k=parent_num)
+                for index_row,row in enumerate(child_indexes):
+                    for index_col,_ in enumerate(row):
+                        random_parent_index = np.random.randint(parent_num)
+                        random_parent_index_row = np.random.randint(self.small_imgs_num_rc[0])
+                        random_parent_index_col = np.random.randint(self.small_imgs_num_rc[1])
+                        child_indexes[index_row][index_col] = parents[random_parent_index]["img"].get_index()[random_parent_index_row][random_parent_index_col]
+                
+                child["img"].set_index(child_indexes)
+                child["score"] = self._fitness_single(child["img"].construct_img())
+                offspring.append(child)
+            
+            return offspring
             
         # Most probably it will computationally expensive but much more efficient
         # TODO: Make the last part of creation of the offspring no tappend the same child, that's if the parent_num not equal to the current_population
         def greedy_parts_v1(gen_num, parent_num=None):
+            if(gen_num == 0):
+                return []
             if(parent_num is None):
                 parent_num = len(self.current_population)
             initial_indexes = self.current_population[0]["img"].get_index()
             child = {"img":utils.Image(imgs=self.imgs, imgs_shape=self.small_img_shape), "score":-1}
             child_indexes = initial_indexes.copy()
             
-            # child["img"].set_index(child_indexes)
-            # child["score"] = self._fitness_single(child["img"].construct_img())
-            # print(child["score"])
-            # input("~~~INPUT DEBUG")
 
             parent_num = min(parent_num, len(self.current_population))
             parents = random.choices(self.current_population, k=parent_num)
@@ -199,6 +219,8 @@ class EA:
 
         # TODO: Make the last part of creation of the offspring not append the same child, that's if the parent_num not equal to the current_population
         def greedy_parts_v2(gen_num, parent_num=None):
+            if(gen_num == 0):
+                return []
             if(parent_num is None):
                 parent_num = len(self.current_population)
             initial_indexes = self.current_population[0]["img"].get_index()
@@ -215,7 +237,7 @@ class EA:
             
             for index_row,row in tqdm(enumerate(child_indexes)):
                 for index_col,_ in tqdm(enumerate(row)):
-                    if(np.random.uniform(0,1) < self.crossover_greedy_probability):
+                    if(np.random.uniform(0,1) > self.crossover_greedy_probability):
                         pass
                     mn_error = 10000000000000000
                     mn_index = 0
@@ -252,8 +274,12 @@ class EA:
         # self.current_population.extend(offspring)
 
         num_population_left = population_size_missed - len(offspring)
-        offspring = greedy_parts_v2(num_population_left, parent_num=2)
+        offspring = uniform(num_population_left, parent_num=self.crossover_num_parents)
         self.current_population.extend(offspring)
+
+        # num_population_left = population_size_missed - len(offspring)
+        # offspring = greedy_parts_v2(num_population_left, parent_num=self.crossover_num_parents)
+        # self.current_population.extend(offspring)
         print("--------------------------------------------------------")
 
 
@@ -288,7 +314,7 @@ class EA:
         return (False,argmn)
 
     # The impelmentation of the algorithm
-    def train(self):
+    def train(self, tmp_img_path=None):
         self.output_img = None
         score_iteration_list = []
 
@@ -308,6 +334,8 @@ class EA:
             self.progress_imgs.append(mn_img)
             print(self.current_population[termination[1]]["score"])
             score_iteration_list.append(self.current_population[termination[1]]["score"])
+            if(tmp_img_path is not None):
+                utils.write_img(tmp_img_path,self.output_img)
             # self.current_population = self._generate_population(parent=self.current_population)
             if(termination[0]):
                 self.output_img = utils.to_img(self.current_population[termination[1]]["img"].construct_img())

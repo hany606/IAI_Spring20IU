@@ -38,6 +38,7 @@ else:
 out_img_path = output_dir+output_file_name+".png"
 out_gif_path = output_dir+output_file_name+".gif"
 results_log_file_path = output_dir+"results_log({:}).json".format(output_file_name)
+tmp_img_path = output_dir+"tmp_"+output_file_name+".png"
 
 
 # --------------- Testing ------------------
@@ -74,7 +75,7 @@ img = utils.read_img(inp_img_path)
 algo = EA(img, small_imgs_assets_path=assets_dir, small_imgs_num=small_imgs_num, format_str="{:05d}.png")
 
 init_time = time()
-progress_imgs, out_img, score = algo.train()
+progress_imgs, out_img, score = algo.train(tmp_img_path=tmp_img_path)
 process_time = time() - init_time
 
 print("----------------------- Finish -----------------------")
@@ -89,8 +90,8 @@ with open(results_log_file_path,"w+") as f:
 # print(type(out_img))
 utils.preview_img(out_img)
 utils.create_gif(out_gif_path, progress_imgs)
-# utils.write_img(out_img_path, out_img)
-out_img.save(out_img_path, "PNG")
+utils.write_img(out_img_path, out_img)
+# out_img.save(out_img_path, "PNG")
 
 
 
