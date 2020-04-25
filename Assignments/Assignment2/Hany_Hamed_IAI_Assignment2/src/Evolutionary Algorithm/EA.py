@@ -17,11 +17,11 @@ class EA:
 
         # Parameters to be tuned
         self.num_iterations = 10000  # 50000 for uniform        # 5 for greedy_v2
-        self.population_size = 50     # 100 for uniform      # 10 for greedy_v2
+        self.population_size = 100     # 100 for uniform      # 10 for greedy_v2
         self.selection_percentage = 0.2
         self.crossover_percentage = (0.5,0.5)   # ((row, col) in case of two parents
         self.crossover_num_parents = 2
-        self.mutation_probability = 0.5    # 0.01 took 14 hrs for uniform and 7k score
+        self.mutation_probability = 0.1    # 0.01 took 14 hrs for uniform and 7k score
         # self.hybrid_crossover_ratio = {"uniform":0, "parts":0, "greedy":0.5}
         self.termination_threshold = 500   # To be chosen, the threshold that the fitness score is acceptable
         self.crossover_greedy_probability = 1
@@ -104,7 +104,10 @@ class EA:
     def _selection(self):
         print("----------------------- Selection -----------------------")
         # Sort and select the best ##
+        # print(self.current_population)
         self.current_population = sorted(self.current_population, key=lambda img: img["score"])
+        # print("----------------------------")
+        # print(self.current_population)
         population_limit = int(self.selection_percentage * len(self.current_population))
         self.current_population = self.current_population[:population_limit]    # take the best ith according to the selection_percentage
         print("--------------------------------------------------------")
@@ -266,14 +269,13 @@ class EA:
         # Generate offspring from the best from the population to get the missed number of the population of the current population
         population_size_missed = int((self.population_size - len(self.current_population)))
         offspring = []
+        # offspring = parents_parts(population_size_missed)
+        # offspring = parents_parts(int(population_size_missed*self.hybrid_crossover_ratio["parts"]))
+        # self.current_population.extend(offspring)
 
         num_population_left = population_size_missed - len(offspring)
-        offspring = parents_parts(num_population_left)
+        offspring = uniform(num_population_left, parent_num=self.crossover_num_parents)
         self.current_population.extend(offspring)
-
-        # num_population_left = population_size_missed - len(offspring)
-        # offspring = uniform(num_population_left, parent_num=self.crossover_num_parents)
-        # self.current_population.extend(offspring)
 
         # num_population_left = population_size_missed - len(offspring)
         # offspring = greedy_parts_v2(num_population_left, parent_num=self.crossover_num_parents)
@@ -282,31 +284,16 @@ class EA:
 
 
     def _mutation(self):
-        def random_resetting():
-            for population_member_dict in self.current_population:
-                img_indexes = population_member_dict["img"].get_index().copy()
-                rows, cols = img_indexes.shape
-                for r in range(rows):
-                    for c in range(cols):
-                        probability = np.random.uniform(0,1)
-                        if(probability < self.mutation_probability):
-                            img_indexes[r,c] = np.random.randint(self.max_index_imgs)
-                population_member_dict["img"].set_index(img_indexes)
-        def swap():
-            for population_member_dict in self.current_population:
-                img_indexes = population_member_dict["img"].get_index().copy()
-                rows, cols = img_indexes.shape
-                for r in range(rows):
-                    for c in range(cols):
-                        probability = np.random.uniform(0,1)
-                        if(probability < self.mutation_probability):
-                            random_r = np.random.randint(rows)
-                            random_c = np.random.randint(cols)
-                            img_indexes[r,c] = img_indexes[random_r, random_c]
-                population_member_dict["img"].set_index(img_indexes)
         print("----------------------- Mutation -----------------------")
-        # random_resetting()
-        swap()
+        for population_member_dict in self.current_population:
+            img_indexes = population_member_dict["img"].get_index().copy()
+            rows, cols = img_indexes.shape
+            for r in range(rows):
+                for c in range(cols):
+                    probability = np.random.uniform(0,1)
+                    if(probability < self.mutation_probability):
+                        img_indexes[r,c] = np.random.randint(self.max_index_imgs)
+            population_member_dict["img"].set_index(img_indexes)
         print("--------------------------------------------------------")
 
     def _termination(self):
