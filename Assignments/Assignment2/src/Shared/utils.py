@@ -1,6 +1,7 @@
 # This file include the utilities functions required for the code
 from PIL import Image as PImage
 import numpy as np
+from tqdm import tqdm   
 
 def preview_img(img, title=None):
     if(title is not None):
@@ -29,7 +30,8 @@ def create_gif(gif_path, imgs):
 
 def read_small_imgs(assets_dir="../../assets/mnist_png/mnist_png/testing/All_resized8x8/", num=10000, format_str=None):
     imgs = []
-    for i in range(num):
+    print("----------- Started reading all the small imgs -----------")
+    for i in tqdm(range(num)):
         if(format_str is None):
             img = read_img(assets_dir+"{:}.png".format(i))
         else:

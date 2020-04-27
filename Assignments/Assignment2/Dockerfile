@@ -28,7 +28,7 @@ WORKDIR /home/HanyHamed
 COPY . .
 
 CMD ["python3 assets/CIFAR_dataset/cifar_imgs_github"]
-CMD ["./assets/CIFAR_dataset/prepare.sh"]
+# CMD ["./assets/CIFAR_dataset/prepare.sh"]
 
 
 # -v /home/HanyHamed/output:./output

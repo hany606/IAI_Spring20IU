@@ -8,6 +8,7 @@ import utils
 import numpy as np
 from tqdm import tqdm
 import random
+from time import time
 
 
 class EA:
@@ -16,15 +17,17 @@ class EA:
         self.progress_imgs = []
 
         # Parameters to be tuned
-        self.num_iterations = 10000  # 50000 for uniform        # 5 for greedy_v2
-        self.population_size = 50     # 100 for uniform      # 10 for greedy_v2
-        self.selection_percentage = 0.2
+        self.num_iterations = 50 #50 #10000  # 50000 for uniform        # 5 for greedy_v2
+        self.population_size = 50   # 50  # 100 for uniform      # 10 for greedy_v2
+        self.selection_percentage = 0.4 #0.5 # 0.2   # 0.4 for greedy
         self.crossover_percentage = (0.5,0.5)   # ((row, col) in case of two parents
         self.crossover_num_parents = 2
-        self.mutation_probability = 0.5    # 0.01 took 14 hrs for uniform and 7k score
+        self.mutation_probability = 0.01     # 0.01
         # self.hybrid_crossover_ratio = {"uniform":0, "parts":0, "greedy":0.5}
-        self.termination_threshold = 500   # To be chosen, the threshold that the fitness score is acceptable
-        self.crossover_greedy_probability = 1
+        self.termination_score_threshold = 500   # To be chosen, the threshold that the fitness score is acceptable
+        self.termination_time_threshold= 300000
+        self.time1 = time()
+        self.crossover_greedy_probability = 0.9     # 1 means 100% will be greedy
 
         self.img_size = (512,512)
 
@@ -57,71 +60,51 @@ class EA:
         return population
 
 
-    # TODO: implement mn score optimization
     def calc_error(self, input_img, gen_img, mn_error=None):
-        shape = input_img.shape
-        error = 0 
-        for r in range(shape[0]):
-            for c in range(shape[1]):
-                for l in range(shape[2]):
-                    loc_error = ((float(input_img[r][c][l]) - float(gen_img[r][c][l]))**2)/(shape[0]*shape[1]*shape[2])
-                    # print(loc_error)
-                    error += loc_error
-                    if(mn_error is not None and mn_error < error):
-                        return 10000000000
+        # shape = input_img.shape
+        # error = 0 
+        error = np.mean(np.power(input_img-gen_img,2))
+
+        # These loops make the process very slow, the above method is much way faster
+        # for r in range(shape[0]):
+        #     for c in range(shape[1]):
+        #         for l in range(shape[2]):
+        #             loc_error = ((float(input_img[r][c][l]) - float(gen_img[r][c][l]))**2)/(shape[0]*shape[1]*shape[2])
+        #             # print(loc_error)
+        #             error += loc_error
+        #             if(mn_error is not None and mn_error < error):
+        #                 return 10000000000
         # print(error)
         return error
 
     # This is the fitness function that return how close the input image
     def _fitness_single(self, img_np):
-        # rows, cols, channels = img_np.shape
         score = self.calc_error(img_np, self.input_img)
-        # print(img_np[0,1], self.input_img[0,1])
-        # for r in range(rows):
-        #     for c in range(cols):
-        #         for l in range(channels):
-        #             loc_score = ((float(img_np[r][c][l]) - float(self.input_img[r][c][l]))**2)/(rows*cols*channels)
-        #             # print(loc_error)
-        #             score += loc_score
-        # if(score < self.min_score):
-        #     self.min_score = score
-        #     self.min_arg_score = i
-        # print(score)
         return score
 
     def _fitness(self, population=None):
-        print("----------------------- Fitness -----------------------")
-        # self.min_score = 255*512*512    # The largest value that could be
-        # self.min_arg_score = 0
-        # Sum the color difference for every pixel.
-        for _,population_member_dict in enumerate(self.current_population):
+        for _,population_member_dict in (enumerate(self.current_population)):
             img = population_member_dict["img"].construct_img()
             score = self._fitness_single(img)
             population_member_dict["score"] = score
-        print("--------------------------------------------------------")
 
 
     def _selection(self):
-        print("----------------------- Selection -----------------------")
         # Sort and select the best ##
         self.current_population = sorted(self.current_population, key=lambda img: img["score"])
         population_limit = int(self.selection_percentage * len(self.current_population))
         self.current_population = self.current_population[:population_limit]    # take the best ith according to the selection_percentage
-        print("--------------------------------------------------------")
 
 
     def _crossover(self):
         def parents_parts(num):
             offspring = []
             for i in range(num):
-                parent1_img = random.choice(self.current_population)["img"]
+                parent1_img =  random.choice(self.current_population)["img"] # self.current_population[0]["img"]
                 parent2_img = random.choice(self.current_population)["img"]
                 child = {"img":utils.Image(imgs=self.imgs, imgs_shape=self.small_img_shape), "score":-1}
                 
-                # threshold = np.random.uniform(0,1)
-
                 child_indexes = parent1_img.get_index().copy()
-                # old_child_indexes = child_indexes.copy()
                 total_num_rc = parent1_img.get_index().shape
                 num_rows_selected = int(total_num_rc[0]*self.crossover_percentage[0])
                 num_cols_selected = int(total_num_rc[1]*self.crossover_percentage[1])
@@ -173,8 +156,6 @@ class EA:
             
             return offspring
             
-        # Most probably it will computationally expensive but much more efficient
-        # TODO: Make the last part of creation of the offspring no tappend the same child, that's if the parent_num not equal to the current_population
         def greedy_parts_v1(gen_num, parent_num=None):
             if(gen_num == 0):
                 return []
@@ -208,13 +189,10 @@ class EA:
             child["img"].set_index(child_indexes)
             child["score"] = self._fitness_single(child["img"].construct_img())
 
-            # print(child["score"])
-            # input("~~~INPUT DEBUG")
 
             offspring = [child for _ in range(gen_num)]
             return offspring
 
-        # TODO: Make the last part of creation of the offspring not append the same child, that's if the parent_num not equal to the current_population
         def greedy_parts_v2(gen_num, parent_num=None):
             if(gen_num == 0):
                 return []
@@ -223,11 +201,6 @@ class EA:
             initial_indexes = self.current_population[0]["img"].get_index()
             child = {"img":utils.Image(imgs=self.imgs, imgs_shape=self.small_img_shape), "score":-1}
             child_indexes = initial_indexes.copy()
-            
-            # child["img"].set_index(child_indexes)
-            # child["score"] = self._fitness_single(child["img"].construct_img())
-            # print(child["score"])
-            # input("~~~INPUT DEBUG")
 
             parent_num = min(parent_num, len(self.current_population))
             parents = random.choices(self.current_population, k=parent_num)
@@ -235,10 +208,10 @@ class EA:
             for index_row,row in tqdm(enumerate(child_indexes)):
                 for index_col,_ in tqdm(enumerate(row)):
                     if(np.random.uniform(0,1) > self.crossover_greedy_probability):
-                        pass
+                        continue
                     mn_error = 10000000000000000
                     mn_index = 0
-                    for i in tqdm(range(parent_num)):
+                    for i in (range(parent_num)):
                         parent_indexes = parents[i]["img"].get_index()
                         for parent_index_row,parent_row in enumerate(parent_indexes):
                             for parent_index_col,_ in enumerate(parent_row):
@@ -256,29 +229,28 @@ class EA:
             child["img"].set_index(child_indexes)
             child["score"] = self._fitness_single(child["img"].construct_img())
 
-            # print(child["score"])
-            # input("~~~INPUT DEBUG")
-
             offspring = [child for _ in range(gen_num)]
             return offspring
 
-        print("----------------------- Crossover -----------------------")
         # Generate offspring from the best from the population to get the missed number of the population of the current population
         population_size_missed = int((self.population_size - len(self.current_population)))
         offspring = []
 
-        num_population_left = population_size_missed - len(offspring)
-        offspring = parents_parts(num_population_left)
-        self.current_population.extend(offspring)
+        # ------------------------- Parts ---------------------------
+        # num_population_left = population_size_missed - len(offspring)
+        # offspring = parents_parts(num_population_left)
+        # self.current_population.extend(offspring)
 
+
+        # ------------------------- Uniform ---------------------------
         # num_population_left = population_size_missed - len(offspring)
         # offspring = uniform(num_population_left, parent_num=self.crossover_num_parents)
         # self.current_population.extend(offspring)
 
-        # num_population_left = population_size_missed - len(offspring)
-        # offspring = greedy_parts_v2(num_population_left, parent_num=self.crossover_num_parents)
-        # self.current_population.extend(offspring)
-        print("--------------------------------------------------------")
+        # ------------------------- Greedy ---------------------------
+        num_population_left = population_size_missed - len(offspring)
+        offspring = greedy_parts_v2(num_population_left, parent_num=self.crossover_num_parents)
+        self.current_population.extend(offspring)
 
 
     def _mutation(self):
@@ -292,6 +264,7 @@ class EA:
                         if(probability < self.mutation_probability):
                             img_indexes[r,c] = np.random.randint(self.max_index_imgs)
                 population_member_dict["img"].set_index(img_indexes)
+        
         def swap():
             for population_member_dict in self.current_population:
                 img_indexes = population_member_dict["img"].get_index().copy()
@@ -304,13 +277,10 @@ class EA:
                             random_c = np.random.randint(cols)
                             img_indexes[r,c] = img_indexes[random_r, random_c]
                 population_member_dict["img"].set_index(img_indexes)
-        print("----------------------- Mutation -----------------------")
-        # random_resetting()
-        swap()
-        print("--------------------------------------------------------")
+        random_resetting()
+        # swap()
 
     def _termination(self):
-        print("----------------------- Termination -----------------------")
         self.min_score = 100000000
         self.min_arg_score = 0
         for i,population_member_dict in enumerate(self.current_population):
@@ -319,11 +289,13 @@ class EA:
                 self.min_score = score
                 self.min_arg_score = i
         mn, argmn = self.min_score, self.min_arg_score
-        # print(argmn, mn)
-        print("--------------------------------------------------------")
-        if(self.termination_threshold > mn):
+        if(self.termination_score_threshold > mn):
             print(mn)
             return (True,argmn)
+        if(self.termination_time_threshold < (time()-self.time1)/60):
+            print(mn)
+            return (True,argmn)
+        
         return (False,argmn)
 
     # The impelmentation of the algorithm
@@ -331,25 +303,29 @@ class EA:
         self.output_img = None
         score_iteration_list = []
 
-        for _ in tqdm(range(self.num_iterations)):
+        for i in tqdm(range(self.num_iterations)):
+            # print("--------------------------------------------------------")
             # print("#{:} iteration".format(i+1))
+            # print("----------------------- Fitness -----------------------")
             self._fitness()
+            # print("----------------------- Selection -----------------------")
             self._selection()
+            # print("----------------------- Crossover -----------------------")
             self._crossover()
+            # print("----------------------- Mutation -----------------------")
             self._mutation()
+            # print("----------------------- Termination -----------------------")
             termination = self._termination()
             mn_img_raw = self.current_population[termination[1]]["img"]
-            # print(mn_img_raw.get_index())
             mn_img_np = mn_img_raw.construct_img()
             mn_img = utils.to_img(mn_img_np)
             self.output_img = mn_img
-            # utils.preview_img(mn_img)
             self.progress_imgs.append(mn_img)
+            # if(i%50 == 0):
             print(self.current_population[termination[1]]["score"])
             score_iteration_list.append(self.current_population[termination[1]]["score"])
             if(tmp_img_path is not None):
                 utils.write_img(tmp_img_path,self.output_img)
-            # self.current_population = self._generate_population(parent=self.current_population)
             if(termination[0]):
                 self.output_img = utils.to_img(self.current_population[termination[1]]["img"].construct_img())
                 self.progress_imgs.append(self.output_img)

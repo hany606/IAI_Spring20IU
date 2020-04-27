@@ -46,18 +46,38 @@ and the dataset itself.
 
 0. Put the input image in 'input" directory
 
-1. Run the following command to run the docker file to setup the docker container
+1. Install the dependencies:
+    ```bash
+        pip3 install tqdm
+        pip3 install numpy
+        pip3 install Pillow
+    ```
+2. Prepare the dataset
+    ```bash
+        cd assets/CIFAR_dataset/cifar_imgs_github
+        python3 install_cifar10.py
+        cd ..
+        chmod +x prepare.sh
+        mkdir -p imgs/imgs_original
+        mkdir -p imgs/imgs_resized
+        ./prepare.sh
+        cd ../..
+        cd src/Extra\ tools
+        python3 cifar_custom.py
+        cd ..        
+        cd Evolutionary\ Algorithm
+    ```
+3. Run the following command and wait until it finishes or press Ctrl+C to finish (There is tmp image is being updated every iteration)
 
-    ```docker  ```
+    ```python3 main.py -i <input_file_name_wo_ext> -o <output_directory_name_wo_ext>```
 
-2. Run the following command to run the bash of the docker container
+    For example:
+    ```python3 main.py``` By default will take input.png as input file from the input directory and save it in the output directory in output/output/output.png
 
-    ```docker ```
-
-3. Inside the docker container's bash, run the following command and wait until it finishes
-
-    ```python3 main.py```
+    ```python3 main.py -i input2 -o output2```
 
 4. To see the progress of the evolving of the image till the output, open the "output/out.gif"
 
-5. To see the output image, open "output.png"
+5. To see the output image, open "output.png" from the output directory
+
+Note: There was a developing for a dockerfile in the progress but did not finish on time
